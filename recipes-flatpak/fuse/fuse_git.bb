@@ -40,10 +40,18 @@ do_configure_prepend() {
 #        cp ${D}/${libdir}/pkgconfig/fuse3.pc ${D}/${libdir}/pkgconfig/fuse.pc
 #}
 
-EXTRA_OECONF += " \
+EXTRA_OECONF_class-target += " \
     --enable-lib \
     --enable-util \
     --disable-example \
     --disable-mtab \
 "
 
+EXTRA_OECONF_class-native += " \
+    --enable-lib \
+    --enable-util \
+    --disable-example \
+    --disable-mtab \
+"
+
+BBCLASSEXTEND = "native"

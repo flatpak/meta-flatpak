@@ -75,5 +75,3 @@ EXTRA_OECONF_class-native += " \
     --disable-xauth \
     --with-systemdsystemunitdir=${systemd_unitdir}/system \
 "
-
-BBCLASSEXTEND = "native"

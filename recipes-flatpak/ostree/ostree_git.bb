@@ -3,7 +3,7 @@ inherit autotools pkgconfig systemd
 
 DEPENDS = " \
     glib-2.0 libsoup-2.4 gpgme e2fsprogs \
-    libpcap fuse libarchive zlib xz \
+    libcap fuse libarchive zlib xz \
     systemd \
 "
 

@@ -12,7 +12,7 @@ SRCREV = "3b55db96614da63d935d641d9cb4311153b774af"
 PV = "2016.8+git${SRCPV}"
 S = "${WORKDIR}/git"
 
-inherit autotools pkgconfig
+inherit autotools pkgconfig gobject-introspection
 AUTO_LIBNAME_PKGS = ""
 
 # possible package configurations

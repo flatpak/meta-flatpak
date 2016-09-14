@@ -1,5 +1,5 @@
 require flatpak.inc
-inherit autotools pkgconfig gettext systemd
+inherit autotools pkgconfig gettext systemd gobject-introspection
 
 DEPENDS = " \
     glib-2.0 json-glib libsoup-2.4 libarchive elfutils fuse \

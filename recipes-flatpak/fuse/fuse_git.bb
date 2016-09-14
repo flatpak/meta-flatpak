@@ -28,9 +28,12 @@ AUTO_LIBNAME_PKGS = ""
 
 # possible package configurations
 PACKAGECONFIG ??= ""
+FUSE_MOUNT_PATH = "${@bb.utils.contains('DISTRO_FEATURES', 'usrmerge', \
+                   '/usr/sbin', '/sbin', d)}"
 
 do_configure_prepend() {
     pushd ${S}
+    export MOUNT_FUSE_PATH="${FUSE_MOUNT_PATH}"
     ./makeconf.sh
     popd
 }

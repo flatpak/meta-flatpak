@@ -6,6 +6,8 @@ DEPENDS = " \
     ostree libassuan libgpg-error bubblewrap systemd \
 "
 
+RDEPENDS_${PN} = "bubblewrap"
+
 EXTRA_OECONF += " \
     --disable-docbook-docs \
     --disable-gtk-doc-html \

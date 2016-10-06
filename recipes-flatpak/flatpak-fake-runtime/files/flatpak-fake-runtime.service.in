@@ -1,0 +1,33 @@
+[Unit]
+Description=Set up a (fake) flatpak runtime for the current OS.
+After=local-fs.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+Environment=_SHA1=1234567890abcdeffedcba09876543211234567890abcdeffedcba0987654321
+Environment=_BP=/var/lib/flatpak/runtime/org.yocto.BasePlatform/@ARCH@/@VERSION@
+Environment=_FP_CURRENT=/usr/share/flatpak-fake-runtime
+
+ExecStart=/usr/bin/mkdir -p ${_BP}/${_SHA1}/files/bin/../sbin/../lib/../libexec/../share/../etc
+ExecStart=/usr/bin/cp ${_FP_CURRENT}/metadata ${_BP}/${_SHA1}
+ExecStart=/usr/bin/cp ${_FP_CURRENT}/deploy   ${_BP}/${_SHA1}
+ExecStart=/usr/bin/touch                      ${_BP}/${_SHA1}/files/.ref
+ExecStart=/usr/bin/ln -sf ${_SHA1}            ${_BP}/active
+
+ExecStart=/usr/bin/mount --bind -o ro /usr/bin     ${_BP}/${_SHA1}/files/bin
+ExecStart=/usr/bin/mount --bind -o ro /usr/sbin    ${_BP}/${_SHA1}/files/sbin
+ExecStart=/usr/bin/mount --bind -o ro /usr/lib     ${_BP}/${_SHA1}/files/lib
+ExecStart=/usr/bin/mount --bind -o ro /usr/libexec ${_BP}/${_SHA1}/files/libexec
+ExecStart=/usr/bin/mount --bind -o ro /usr/share   ${_BP}/${_SHA1}/files/share
+ExecStart=/usr/bin/mount --bind -o ro /etc         ${_BP}/${_SHA1}/files/etc
+
+ExecStop=/usr/bin/umount ${_BP}/${_SHA1}/files/bin
+ExecStop=/usr/bin/umount ${_BP}/${_SHA1}/files/sbin
+ExecStop=/usr/bin/umount ${_BP}/${_SHA1}/files/lib
+ExecStop=/usr/bin/umount ${_BP}/${_SHA1}/files/libexec
+ExecStop=/usr/bin/umount ${_BP}/${_SHA1}/files/share
+ExecStop=/usr/bin/umount ${_BP}/${_SHA1}/files/etc
+
+[Install]
+WantedBy=multi-user.target

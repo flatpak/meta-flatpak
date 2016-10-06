@@ -1,0 +1,4 @@
+[Runtime]
+name=org.yocto.BasePlatform
+runtime=org.yocto.BasePlatform/@ARCH@/@VERSION@
+sdk=org.yocto.BaseSdk/@ARCH@/@VERSION@

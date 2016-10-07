@@ -1,0 +1,22 @@
+This is poky with joshuagl's usrmerge patchset applied and an
+experimental meta-flatpak layer for ostree/flatpak support.
+
+Common (unmodified) targets (from poky) are:
+    core-image-minimal
+    core-image-sato
+    meta-toolchain
+    meta-ide-support
+
+New flatpak-specific targets are:
+
+    - flatpak-runtime-image:
+          core-image-minimal with usrmerge and ostree/flatpak support
+    - flatpak-sdk-image:
+          flatpak-runtime-image + development support
+
+The runtime image is meant to be used on target devices. The SDK image
+is a flatpak SDK runtime for producing (off device) flatpaks for the
+runtime image.
+
+See README.flatpak-test for more detailed instruction on how to test
+this whole shebang.

@@ -6,6 +6,8 @@ SECTION = "misc"
 LICENSE = "MIT"
 LIC_FILES_CHKSUM = "file://LICENSE-BSD;md5=f9f435c1bd3a753365e799edf375fc42"
 
+inherit systemd
+
 SRC_URI = " \
     file://LICENSE-BSD \
     file://flatpak-fake-runtime.service.in \
@@ -14,6 +16,11 @@ SRC_URI = " \
 "
 
 S = "${WORKDIR}"
+
+FILES_${PN} = " \
+    ${datadir}/flatpak-fake-runtime \
+    ${systemd_unitdir}/system/flatpak-fake-runtime.service \
+"
 
 SYSTEMD_SERVICE_${PN} = "flatpak-fake-runtime.service"
 
@@ -36,9 +43,9 @@ do_compile() {
 }
 
 do_install () {
-    install -d ${D}${sysconfdir}/systemd/system
+    install -d ${D}${systemd_unitdir}/system
     install -m 0644 ${S}/flatpak-fake-runtime.service \
-        ${D}${sysconfdir}/systemd/system
+        ${D}${systemd_unitdir}/system
 
     install -d ${D}${datadir}/flatpak-fake-runtime
     install -m 0644 ${S}/deploy   ${D}${datadir}/flatpak-fake-runtime

@@ -15,6 +15,8 @@ SRC_URI = " \
 
 S = "${WORKDIR}"
 
+SYSTEMD_SERVICE_${PN} = "flatpak-fake-runtime.service"
+
 do_compile() {
     # there is probable a proper bitbake variable for arch...
     local _t='${TARGET_SYS}'

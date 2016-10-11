@@ -1,2 +1,3 @@
-A collection of recipes necessary for getting flatpak built for Ostro/*.
+A collection of recipes for getting flatpak/ostree up and running
+on/for Yocto based images.
 

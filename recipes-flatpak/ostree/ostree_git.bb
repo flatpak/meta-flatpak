@@ -7,6 +7,10 @@ DEPENDS = " \
     systemd \
 "
 
+RDEPENDS_${PN} = " \
+    gnupg \
+"
+
 FILES_${PN} += "${libdir}/girepository-1.0 ${datadir}/gir-1.0"
 
 SYSTEMD_SERVICE_${PN} = "ostree-prepare-root.service ostree-remount.service"

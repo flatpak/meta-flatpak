@@ -7,6 +7,6 @@ IMAGE_FEATURES_append = " ssh-server-openssh"
 
 # Pull in flatpak and its dependencies (+ terminfo and certificate files).
 IMAGE_INSTALL_append = " \
-    systemd flatpak flatpak-fake-runtime \
+    systemd flatpak flatpak-utils flatpak-fake-runtime \
     ca-certificates ncurses-terminfo \
 "

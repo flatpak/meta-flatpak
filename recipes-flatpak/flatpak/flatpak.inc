@@ -3,9 +3,12 @@ HOMEPAGE = "http://flatpak.org"
 LICENSE = "LGPLv2.1"
 LIC_FILES_CHKSUM = "file://COPYING;md5=4fbd65380cdd255951079008b364516c"
 
-SRC_URI = "gitsm://git@github.com/flatpak/flatpak;protocol=https \
-           file://0001-autogen.sh-fall-back-to-no-gtkdocize-if-it-is-there-.patch \
-           "
+SRC_URI = " \
+    gitsm://git@github.com/flatpak/flatpak;protocol=https \
+    file://0001-autogen.sh-fall-back-to-no-gtkdocize-if-it-is-there-.patch \
+    file://0001-common-Allow-command-to-include-command-line-options.patch \
+    file://0001-lib-Allow-passing-command-line-argument-through-laun.patch \
+"
 
 SRCREV = "a5536d0420df8a537ab8327319a431127b0ebed7"
 

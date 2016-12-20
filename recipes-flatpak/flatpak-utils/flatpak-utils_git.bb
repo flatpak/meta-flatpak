@@ -7,16 +7,18 @@ LIC_FILES_CHKSUM = "file://LICENSE-BSD;md5=f9f435c1bd3a753365e799edf375fc42"
 DEPENDS = "flatpak systemd"
 
 SRC_URI = " \
-    git://git@github.com/klihub/flatpak-utils.git;protocol=https;branch=cleanup \
+    git://git@github.com/klihub/flatpak-utils.git;protocol=https;branch=master \
   "
 
-SRCREV = "7daa79a9e6692a7371419736bbaa088ab2a422ba"
+SRCREV = "14d2b39ad2d00db50ae9d95e65aa1380524d09ff"
 
 inherit autotools pkgconfig systemd
 
 AUTO_LIBNAME_PKGS = ""
 
 S = "${WORKDIR}/git"
+
+EXTRA_OECONF += "--with-systemdunitdir=${systemd_unitdir}"
 
 # possible package configurations
 PACKAGECONFIG ??= ""

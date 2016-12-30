@@ -47,8 +47,8 @@ AUTO_LIBNAME_PKGS = ""
 PACKAGECONFIG ??= ""
 
 do_configure_prepend() {
-    pushd ${S}
+    cd ${S}
     NOCONFIGURE=1 ./autogen.sh
-    popd
+    cd -
 }
 

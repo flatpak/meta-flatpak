@@ -32,10 +32,10 @@ FUSE_MOUNT_PATH = "${@bb.utils.contains('DISTRO_FEATURES', 'usrmerge', \
                    '/usr/sbin', '/sbin', d)}"
 
 do_configure_prepend() {
-    pushd ${S}
+    cd ${S}
     export MOUNT_FUSE_PATH="${FUSE_MOUNT_PATH}"
     ./makeconf.sh
-    popd
+    cd -
 }
 
 #do_install_append() {

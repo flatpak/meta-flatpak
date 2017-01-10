@@ -1,4 +1,4 @@
-require ../common/extend-native.inc
+require ../../common/extend-native.inc
 
 # GpgME gpg backends
 GPGME_BACKENDS ?= "gnupg"

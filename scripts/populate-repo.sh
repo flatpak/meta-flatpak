@@ -242,9 +242,25 @@ repo_export () {
         ostree --repo=$REPO_EXPORT pull-local $REPO_PATH
         ostree --repo=$REPO_EXPORT summary -u \
            --gpg-homedir=$GPG_HOME --gpg-sign=$GPG_ID
+        repo_apache_config
     else
         echo "* No export repo given, not exporting (in archive-z2 format)..."
     fi
+}
+
+# Generate and HTTP configuration fragment for the exported repository.
+repo_apache_config () {
+    local _repo_path
+
+    cd $REPO_EXPORT && _repo_path=$(pwd) && cd -
+
+    echo "* Generating apache2 config fragment for $REPO_EXPORT..."
+    (echo "Alias \"/flatpak/\" \"$_repo_path/\""
+     echo ""
+     echo "<Directory $_repo_path>"
+     echo "Options Indexes FollowSymLinks"
+     echo "Require all granted"
+     echo "</Directory>") > $REPO_EXPORT.http.conf
 }
 
 # Generate list of libraries provided by the image.

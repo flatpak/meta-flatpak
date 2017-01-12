@@ -101,13 +101,15 @@ parse_command_line () {
         esac
     done
 
-    REPO_ARCH=${IMG_ARCH#qemu}
-    REPO_ARCH=${REPO_ARCH//-/_}
-    echo "REPO_ARCH: $REPO_ARCH"
+    #REPO_ARCH=${IMG_ARCH#qemu}
+    #REPO_ARCH=${REPO_ARCH//-/_}
+    #echo "REPO_ARCH: $REPO_ARCH"
 
     case $IMG_ARCH in
         qemux86-64) REPO_ARCH=x86_64;    QEMU_ARCH=qemux86-64;;
         qemux86)    REPO_ARCH=x86;       QEMU_ARCH=qemux86;;
+        intel*64)   REPO_ARCH=x86_64;    QEMU_ARCH=qemux86-64;;
+        intel*)     REPO_ARCH=x86;       QEMU_ARCH=qemux86;;
         x86_64)     REPO_ARCH=x86_64;    QEMU_ARCH=qemux86-64;;
         x86)        REPO_ARCH=x86;       QEMU_ARCH=qemux86;;
         *)          REPO_ARCH=$IMG_ARCH; QEMU_ARCH=$IMG_ARCH;;

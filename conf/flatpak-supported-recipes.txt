@@ -1,0 +1,7 @@
+bubblewrap@flatpak
+ca-certificates@flatpak
+flatpak-fake-runtime@flatpak
+flatpak-utils@flatpak
+flatpak@flatpak
+fuse@flatpak
+ostree@flatpak

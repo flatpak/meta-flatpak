@@ -240,6 +240,8 @@ repo_export () {
     if [ -n "$REPO_EXPORT" ]; then
         echo "* Mirroring $REPO_PATH to export repository $REPO_EXPORT..."
         ostree --repo=$REPO_EXPORT pull-local $REPO_PATH
+        ostree --repo=$REPO_EXPORT summary -u \
+           --gpg-homedir=$GPG_HOME --gpg-sign=$GPG_ID
     else
         echo "* No export repo given, not exporting (in archive-z2 format)..."
     fi

@@ -85,7 +85,7 @@ do_flatpakrepo () {
        --tmp-dir $FLATPAK_TMPDIR
 }
 
-DEPENDS += "ostree-native flatpak-native"
+do_flatpakrepo[depends] += "ostree-native:do_populate_sysroot flatpak-native:do_populate_sysroot"
 
 SSTATETASKS += "do_flatpakrepo"
 do_flatpakrepo[sstate-inputdirs]  = "${IMGDEPLOYDIR}"

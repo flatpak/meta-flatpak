@@ -1,1 +1,3 @@
-PACKAGECONFIG_append = "user-session"
+PACKAGECONFIG_append = " \
+    ${@bb.utils.contains('DISTRO_FEATURES', 'flatpak', 'user-session', '', d)} \
+"

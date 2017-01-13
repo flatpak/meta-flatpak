@@ -77,6 +77,7 @@ do_flatpakrepo () {
        --repo-path $FLATPAK_REPO \
        --repo-mode bare-user \
        --repo-export $FLATPAK_EXPORT \
+       --rolling-branch latest-build \
        --image-dir $FLATPAK_ROOTFS \
        --image-type $RUNTIME_TYPE \
        --image-arch $FLATPAK_ARCH \

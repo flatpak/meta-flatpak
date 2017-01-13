@@ -223,23 +223,32 @@ repo_populate () {
     ostree --repo=$REPO_PATH commit \
            --gpg-homedir=$GPG_HOME --gpg-sign=$GPG_ID \
            --owner-uid=0 --owner-gid=0 --no-xattrs \
-           -s "$IMG_TYPE $IMG_VERSION" \
-           -b "Commit of $IMG_TARBALL into the repository." \
+           --subject "$IMG_TYPE $IMG_VERSION" \
+           --body "Commit of $IMG_TYPE ($IMG_VERSION) into the repository." \
            --branch=$REPO_BRANCH $SYSROOT
 
     echo "* Creating version branch $VERSION_BRANCH..."
     ostree --repo=$REPO_PATH commit --branch=$VERSION_BRANCH \
+           --gpg-homedir=$GPG_HOME --gpg-sign=$GPG_ID \
+           --subject "$IMG_TYPE $IMG_VERSION" \
+           --body "Commit of $IMG_TYPE ($IMG_VERSION) into the repository." \
            --tree=ref=$REPO_BRANCH
 
     if [ -n "$BUILD_BRANCH" ]; then
         echo "* Creating build branch $BUILD_BRANCH..."
         ostree --repo=$REPO_PATH commit --branch=$BUILD_BRANCH \
+               --gpg-homedir=$GPG_HOME --gpg-sign=$GPG_ID \
+               --subject "$IMG_TYPE $IMG_VERSION" \
+               --body "Commit of $IMG_TYPE ($IMG_VERSION) into the repository." \
                --tree=ref=$REPO_BRANCH
     fi
 
     if [ -n "$ROLLING_BRANCH" ];then
         echo "* Creating rolling branch $ROLLING_BRANCH..."
         ostree --repo=$REPO_PATH commit --branch=$ROLLING_BRANCH \
+               --gpg-homedir=$GPG_HOME --gpg-sign=$GPG_ID \
+               --subject "$IMG_TYPE $IMG_VERSION" \
+               --body "Commit of $IMG_TYPE ($IMG_VERSION) into the repository." \
                --tree=ref=$REPO_BRANCH
     fi
 }
@@ -258,6 +267,7 @@ repo_export () {
         ostree --repo=$REPO_EXPORT pull-local $REPO_PATH
         ostree --repo=$REPO_EXPORT summary -u \
            --gpg-homedir=$GPG_HOME --gpg-sign=$GPG_ID
+
         repo_apache_config
     else
         echo "* No export repo given, not exporting (in archive-z2 format)..."

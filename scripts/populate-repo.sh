@@ -17,12 +17,14 @@ print_usage () {
     echo "  --repo-mode <type>   repository mode [archive-z2]"
     echo "  --repo-org <org>     how to name runtime and branches [iot.refkit]"
     echo "  --repo-export <exp>  export the image also to archive-z2 <exp>"
+    echo "  --rolling-branch <b> export also as rolling branch <b>"
     echo "  --gpg-home <dir>     GPG home directory for keyring"
     echo "  --gpg-id <id>        GPG key id to use for signing"
     echo "  --image-dir <dir>    image directory to populate repository with"
     echo "  --image-type <type>  image type (runtime or sdk)"
     echo "  --image-arch <arch>  image architecture (x86, x86-64, ...)"
     echo "  --image-version <v>  image version/branch [0.0.1]"
+    echo "  --image-buildid <b>  create branch also for build-id <b>"
     echo "  --image-libs <path>  image library list, if any, to generate"
     echo "  --tmp-dir <path>     directory for temporary files (/tmp)"
     echo "  --help               print this help and exit"
@@ -46,6 +48,11 @@ parse_command_line () {
                 ;;
             --repo-export)
                 REPO_EXPORT=$2
+                shift 2
+                ;;
+
+            --rolling-branch)
+                ROLLING_BRANCH=$2
                 shift 2
                 ;;
 
@@ -121,24 +128,25 @@ parse_command_line () {
     fi
 
     case $IMG_TYPE in
-        runtime)
-            REPO_BRANCH=runtime/$REPO_ORG.BasePlatform/$REPO_ARCH/$IMG_VERSION
-            ;;
-        sdk)
-            REPO_BRANCH=runtime/$REPO_ORG.BaseSdk/$REPO_ARCH/$IMG_VERSION
-            ;;
+        runtime) BASE_TYPE=BasePlatform;;
+        sdk)     BASE_TYPE=BaseSdk;;
         *)
             echo "Invalid image type: $IMG_TYPE";
             exit 1
             ;;
     esac
 
+    REPO_BRANCH=runtime/$REPO_ORG.$BASE_TYPE/$REPO_ARCH/$IMG_VERSION
     VERSION_BRANCH=version/$IMG_TYPE/$REPO_ARCH/$IMG_VERSION
 
     if [ -n "$IMG_BUILDID" ]; then
         BUILD_BRANCH=build/$IMG_TYPE/$REPO_ARCH/$IMG_BUILDID
     else
         BUILD_BRANCH=""
+    fi
+
+    if [ -n "$ROLLING_BRANCH" ]; then
+        ROLLING_BRANCH="runtime/$REPO_ORG.$BASE_TYPE/$REPO_ARCH/$ROLLING_BRANCH"
     fi
 
     if [ -z "$IMG_SYSROOT" ]; then
@@ -224,8 +232,14 @@ repo_populate () {
            --tree=ref=$REPO_BRANCH
 
     if [ -n "$BUILD_BRANCH" ]; then
-        echo "* Creating build branch $BUILD_BRANCH"
+        echo "* Creating build branch $BUILD_BRANCH..."
         ostree --repo=$REPO_PATH commit --branch=$BUILD_BRANCH \
+               --tree=ref=$REPO_BRANCH
+    fi
+
+    if [ -n "$ROLLING_BRANCH" ];then
+        echo "* Creating rolling branch $ROLLING_BRANCH..."
+        ostree --repo=$REPO_PATH commit --branch=$ROLLING_BRANCH \
                --tree=ref=$REPO_BRANCH
     fi
 }

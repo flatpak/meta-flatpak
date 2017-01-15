@@ -6,16 +6,16 @@ inherit distro_features_check
 REQUIRED_DISTRO_FEATURES_append = " usrmerge systemd pam"
 
 
-FLATPAK_TOPDIR = "${TOPDIR}"
-FLATPAK_TMPDIR = "${TOPDIR}/tmp-glibc"
-FLATPAK_ROOTFS = "${IMAGE_ROOTFS}"
-FLATPAK_ARCH   = "${MACHINE}"
-FLATPAK_REPO   = "${IMGDEPLOYDIR}/${IMAGE_BASENAME}-${BUILD_ID}.flatpak"
-FLATPAK_EXPORT = "${TOPDIR}/${IMAGE_BASENAME}.flatpak"
-FLATPAK_GPGDIR = "${TOPDIR}/gpg"
-FLATPAK_GPGOUT = "iot-refkit"
-FLATPAK_GPGID  = "iot-refkit@key"
-FLATPAK_DISTRO = "${DISTRO}"
+FLATPAK_TOPDIR  = "${TOPDIR}"
+FLATPAK_TMPDIR  = "${TOPDIR}/tmp-glibc"
+FLATPAK_ROOTFS  = "${IMAGE_ROOTFS}"
+FLATPAK_ARCH    = "${MACHINE}"
+FLATPAK_REPO    = "${IMGDEPLOYDIR}/${IMAGE_BASENAME}-${BUILD_ID}.flatpak"
+FLATPAK_EXPORT ?= "${TOPDIR}/${IMAGE_BASENAME}.flatpak"
+FLATPAK_GPGDIR ?= "${TOPDIR}/gpg"
+FLATPAK_GPGOUT ?= "iot-refkit"
+FLATPAK_GPGID  ?= "iot-refkit@key"
+FLATPAK_DISTRO  = "${DISTRO}"
 
 do_flatpakrepo () {
    #echo "WORKDIR:          ${@d.getVar('WORKDIR')}"

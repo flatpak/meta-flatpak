@@ -17,6 +17,7 @@ print_usage () {
     echo "    -n <name>    real name associated with the generated key"
     echo "    -m <mail>    e-mail address associated with the genrated key"
     echo "    -H <home>    GPG home directory for the keyring."
+    echo "    -2           import keys to GPG2 keyring as well"
     echo "    -h           show this help"
 }
 
@@ -59,6 +60,9 @@ parse_command_line () {
             --home|-H)
                 GPG_HOME="$2"
                 shift 2
+                ;;
+            --gpg2|-2)
+                GPG2_IMPORT="yes"
                 ;;
             --help|-h)
                 print_usage
@@ -119,8 +123,12 @@ gpg1_genkeys () {
 
 # Import keys to GPG2 keyring.
 gpg2_import () {
-    echo "* Importing keys to GPG2 keyring..."
-    gpg --homedir=$GPG_HOME --export-secret-keys | gpg2 --import
+    if [ "$GPG2_IMPORT" = "yes" ]; then
+        echo "* Importing keys to GPG2 keyring..."
+        gpg --homedir=$GPG_HOME --export-secret-keys | gpg2 --import
+    else
+        echo "* GPG2 import not requested, skipping..."
+    fi
 }
 
 
@@ -134,6 +142,7 @@ GPG_SUBLENGTH="2048"
 GPG_NAME="IoT RefKit Signing Key"
 GPG_BASE="iot-refkit"
 GPG_HOME=".gpg.flatpak"
+GPG2_IMPORT=""
 
 set -e
 

@@ -17,6 +17,57 @@ FLATPAK_GPGOUT ?= "iot-refkit"
 FLATPAK_GPGID  ?= "iot-refkit@key"
 FLATPAK_DISTRO  = "${DISTRO}"
 
+# Guesstimate whether this is runtime or an SDK image.
+FLATPAK_RUNTIME = "${@bb.utils.contains('IMAGE_FEATURES', 'tools-sdk', \
+                                        'sdk', 'runtime', d)}"
+
+
+#
+# generation of GPG keys for signing flatpak/OSTree repositories
+#
+
+do_flatpakkeys () {
+   # Bail out early if flatpak is not enabled.
+   HAS_FLATPAK="${@bb.utils.contains('IMAGE_FEATURES', 'flatpak', 'yes', '', d)}"
+   if [ "$HAS_FLATPAK" != "yes" ]; then
+       echo "Flatpak not enabled in image, skip key generation..."
+       return 0
+   fi
+
+   FLATPAKBASE="${@d.getVar('FLATPAKBASE')}"
+   FLATPAK_GPGDIR="${@d.getVar('FLATPAK_GPGDIR')}"
+   FLATPAK_GPGOUT="${@d.getVar('FLATPAK_GPGOUT')}"
+   FLATPAK_GPGID="${@d.getVar('FLATPAK_GPGID')}"
+
+   # Generate repo signing GPG keys if we don't have them yet.
+   if [ ! -d $FLATPAK_GPGDIR ]; then
+       $FLATPAKBASE/scripts/gpg-keygen.sh \
+           --home $FLATPAK_GPGDIR \
+           --output $FLATPAK_GPGOUT \
+           --id $FLATPAK_GPGID
+   else
+       echo "Will (re)use existing GPG keys from $FLATPAK_GPGDIR."
+   fi
+}
+
+do_flatpakkeys[depends] += " \
+    gnupg-native:do_populate_sysroot \
+"
+
+SSTATETASKS += "do_flatpakkeys"
+
+python do_flatpakkeys_setscene () {
+    sstate_setscene(d)
+}
+
+addtask do_flatpakkeys_setscene
+addtask flatpakkeys before do_rootfs
+
+
+#
+# generating/populating flatpak repositories from/for images
+#
+
 do_flatpakrepo () {
    #echo "WORKDIR:          ${@d.getVar('WORKDIR')}"
    #echo "DEPLOY_DIR_IMAGE: ${@d.getVar('DEPLOY_DIR_IMAGE')}"
@@ -37,6 +88,7 @@ do_flatpakrepo () {
        return 0
    fi
 
+   FLATPAKBASE="${@d.getVar('FLATPAKBASE')}"
    FLATPAK_TOPDIR="${@d.getVar('FLATPAK_TOPDIR')}"
    FLATPAK_TMPDIR="${@d.getVar('FLATPAK_TMPDIR')}"
    FLATPAK_ROOTFS="${@d.getVar('FLATPAK_ROOTFS')}"
@@ -47,28 +99,10 @@ do_flatpakrepo () {
    FLATPAK_REPO="${@d.getVar('FLATPAK_REPO')}"
    FLATPAK_EXPORT="${@d.getVar('FLATPAK_EXPORT')}"
    FLATPAK_DISTRO="${@d.getVar('FLATPAK_DISTRO')}"
+   FLATPAK_RUNTIME="${@d.getVar('FLATPAK_RUNTIME')}"
+
    BUILD_ID="${@d.getVar('BUILD_ID')}"
-
-   # Guesstimate whether this is runtime or an SDK image.
-   HAS_SDK="${@bb.utils.contains('IMAGE_FEATURES', 'tools-sdk', 'yes', '', d)}"
-   if [ "$HAS_SDK" = "yes" ]; then
-       RUNTIME_TYPE=sdk
-   else
-       RUNTIME_TYPE=runtime
-   fi
-
    VERSION=$(cat $FLATPAK_ROOTFS/etc/version)
-   FLATPAKBASE="${@d.getVar('FLATPAKBASE')}"
-
-   # Generate repo signing GPG keys if we don't have them yet.
-   if [ ! -d $FLATPAK_GPGDIR ]; then
-       $FLATPAKBASE/scripts/gpg-keygen.sh \
-           --home $FLATPAK_GPGDIR \
-           --output $FLATPAK_GPGOUT \
-           --id $FLATPAK_GPGID
-   else
-       echo "Will (re)use existing GPG keys from $FLATPAK_GPGDIR."
-   fi
 
    # Generate/populate flatpak/OSTree repository
    $FLATPAKBASE/scripts/populate-repo.sh \
@@ -79,7 +113,7 @@ do_flatpakrepo () {
        --repo-export $FLATPAK_EXPORT \
        --rolling-branch latest-build \
        --image-dir $FLATPAK_ROOTFS \
-       --image-type $RUNTIME_TYPE \
+       --image-type $FLATPAK_RUNTIME \
        --image-arch $FLATPAK_ARCH \
        --image-version $VERSION \
        --image-buildid $BUILD_ID \

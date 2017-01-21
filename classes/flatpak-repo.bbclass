@@ -5,64 +5,11 @@
 inherit distro_features_check
 REQUIRED_DISTRO_FEATURES_append = " usrmerge systemd pam"
 
-
-FLATPAK_TOPDIR  = "${TOPDIR}"
-FLATPAK_TMPDIR  = "${TOPDIR}/tmp-glibc"
-FLATPAK_ROOTFS  = "${IMAGE_ROOTFS}"
-FLATPAK_ARCH    = "${MACHINE}"
-FLATPAK_REPO    = "${IMGDEPLOYDIR}/${IMAGE_BASENAME}-${BUILD_ID}.flatpak"
-FLATPAK_EXPORT ?= "${TOPDIR}/${IMAGE_BASENAME}.flatpak"
-FLATPAK_GPGDIR ?= "${TOPDIR}/gpg"
-FLATPAK_GPGOUT ?= "iot-refkit"
-FLATPAK_GPGID  ?= "iot-refkit@key"
-FLATPAK_DISTRO  = "${DISTRO}"
+inherit flatpak-variables flatpak-keys
 
 # Guesstimate whether this is runtime or an SDK image.
 FLATPAK_RUNTIME = "${@bb.utils.contains('IMAGE_FEATURES', 'tools-sdk', \
                                         'sdk', 'runtime', d)}"
-
-
-#
-# generation of GPG keys for signing flatpak/OSTree repositories
-#
-
-do_flatpakkeys () {
-   # Bail out early if flatpak is not enabled.
-   HAS_FLATPAK="${@bb.utils.contains('IMAGE_FEATURES', 'flatpak', 'yes', '', d)}"
-   if [ "$HAS_FLATPAK" != "yes" ]; then
-       echo "Flatpak not enabled in image, skip key generation..."
-       return 0
-   fi
-
-   FLATPAKBASE="${@d.getVar('FLATPAKBASE')}"
-   FLATPAK_GPGDIR="${@d.getVar('FLATPAK_GPGDIR')}"
-   FLATPAK_GPGOUT="${@d.getVar('FLATPAK_GPGOUT')}"
-   FLATPAK_GPGID="${@d.getVar('FLATPAK_GPGID')}"
-
-   # Generate repo signing GPG keys if we don't have them yet.
-   if [ ! -d $FLATPAK_GPGDIR ]; then
-       $FLATPAKBASE/scripts/gpg-keygen.sh \
-           --home $FLATPAK_GPGDIR \
-           --output $FLATPAK_GPGOUT \
-           --id $FLATPAK_GPGID
-   else
-       echo "Will (re)use existing GPG keys from $FLATPAK_GPGDIR."
-   fi
-}
-
-do_flatpakkeys[depends] += " \
-    gnupg-native:do_populate_sysroot \
-"
-
-SSTATETASKS += "do_flatpakkeys"
-
-python do_flatpakkeys_setscene () {
-    sstate_setscene(d)
-}
-
-addtask do_flatpakkeys_setscene
-addtask flatpakkeys before do_rootfs
-
 
 #
 # generating/populating flatpak repositories from/for images
@@ -123,6 +70,18 @@ do_flatpakrepo () {
 do_flatpakrepo[depends] += " \
     ostree-native:do_populate_sysroot \
     flatpak-native:do_populate_sysroot \
+"
+
+do_flatpakrepo[vardeps] += " \
+    FLATPAK_GPGDIR \
+    FLATPAK_GPGID \
+    FLATPAK_REPO \
+    FLATPAK_EXPORT \
+    FLATPAK_ROOTFS \
+    FLATPAK_RUNTIME \
+    FLATPAK_ARCH \
+    VERSION \
+    BUILD_ID \
 "
 
 SSTATETASKS += "do_flatpakrepo"

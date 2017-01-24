@@ -12,8 +12,8 @@ inherit flatpak-variables
 do_flatpakkeys () {
    # Bail out early if flatpak is not enabled.
    HAS_FLATPAK="${@bb.utils.contains('DISTRO_FEATURES', 'flatpak', 'y', 'n', d)}"
-   if [ "$HAS_FLATPAK" = "y" ]; then
-       echo "Flatpak not enabled in image, skip key generation..."
+   if [ "$HAS_FLATPAK" != "y" ]; then
+       echo "Flatpak not enabled in distro, skip key generation..."
        return 0
    fi
 

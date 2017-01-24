@@ -93,7 +93,7 @@ python do_flatpakrepo_setscene () {
 }
 
 addtask do_flatpakrepo_setscene
-addtask flatpakrepo after do_rootfs before do_image
+addtask flatpakrepo after do_rootfs # before do_image
 
 #
 # Alternatively we could treat flatpak repositories as just another

@@ -10,7 +10,7 @@ SRC_URI = " \
     git://git@github.com/klihub/flatpak-utils.git;protocol=https;branch=master \
   "
 
-SRCREV = "14d2b39ad2d00db50ae9d95e65aa1380524d09ff"
+SRCREV = "8cd427c2b8c6b29579210c74798a3a90076968c7"
 
 inherit autotools pkgconfig systemd
 

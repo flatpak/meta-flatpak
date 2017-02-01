@@ -47,6 +47,12 @@ do_flatpakrepo () {
    FLATPAK_EXPORT="${@d.getVar('FLATPAK_EXPORT')}"
    FLATPAK_DISTRO="${@d.getVar('FLATPAK_DISTRO')}"
    FLATPAK_RUNTIME="${@d.getVar('FLATPAK_RUNTIME')}"
+   FLATPAK_RUNTIME_IMAGE="${@d.getVar('FLATPAK_RUNTIME_IMAGE')}"
+
+   if [ "$FLATPAK_RUNTIME" != "sdk" -a "$FLATPAK_RUNTIME_IMAGE" != "yes" ]; then
+       echo "Flatpak runtime image not enabled, skip repo generation..."
+       return 0
+   fi
 
    BUILD_ID="${@d.getVar('BUILD_ID')}"
    VERSION=$(cat $FLATPAK_ROOTFS/etc/version)

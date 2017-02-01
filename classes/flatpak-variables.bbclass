@@ -9,3 +9,9 @@ FLATPAK_GPGDIR ?= "${TOPDIR}/gpg"
 FLATPAK_GPGOUT ?= "iot-ref-kit"
 FLATPAK_GPGID  ?= "iot-ref-kit@key"
 FLATPAK_DISTRO  = "${DISTRO}"
+
+# By default we trigger flatpak repository population/generation only
+# for images that can be used as flatpak SDK runtimes (i.e. images that
+# has tools-sdk enabled). You can enable repository generation for pure
+# runtime images by overriding ths variable and setting it to 'yes'.
+FLATPAK_RUNTIME_IMAGE ?= ""

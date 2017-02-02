@@ -6,7 +6,7 @@ After=local-fs.target
 Type=oneshot
 RemainAfterExit=yes
 Environment=_SHA1=1234567890abcdeffedcba09876543211234567890abcdeffedcba0987654321
-Environment=_BP=/var/lib/flatpak/runtime/org.yocto.BasePlatform/@ARCH@/@VERSION@
+Environment=_BP=/var/lib/flatpak/runtime/@ORG@.BasePlatform/@ARCH@/@VERSION@
 Environment=_FP_CURRENT=/usr/share/flatpak-fake-runtime
 
 ExecStart=/bin/mkdir -p ${_BP}/${_SHA1}/files/bin/../sbin/../lib/../libexec/../share/../etc

@@ -30,7 +30,7 @@ do_compile() {
     local _v="1234567890abcdeffedcba09876543211234567890abcdeffedcba0987654321"
 
     cat ${S}/flatpak-fake-runtime.service.in | \
-        sed "s#@ARCH@#${_t%%-*}#g;s#@VERSION@#0.0.1#g" \
+        sed "s#@ARCH@#${_t%%-*}#g;s#@VERSION@#0.0.1#g;s#@ORG@#iot.refkit#g" \
             > ${S}/flatpak-fake-runtime.service
 
     cat ${S}/metadata.in | \

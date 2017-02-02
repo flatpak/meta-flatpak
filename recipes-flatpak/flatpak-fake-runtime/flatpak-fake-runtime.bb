@@ -25,20 +25,25 @@ FILES_${PN} = " \
 SYSTEMD_SERVICE_${PN} = "flatpak-fake-runtime.service"
 
 do_compile() {
-    # there is probable a proper bitbake variable for arch...
-    local _t='${TARGET_SYS}'
-    local _v="1234567890abcdeffedcba09876543211234567890abcdeffedcba0987654321"
+    # I guess ${SDKMACHINE} is the best choice here...
+    local _m='${SDKMACHINE}'
+    # Probably we should create two fake runtimes:
+    #   - 'current': always means the actual running version
+    #   - real $VERSION: inherit flatpak-variables and get it from there...
+    # For now we just go with 'latest-build' to match flatpak-repo.bbclass.
+    local _v='latest-build'
+    local _sha="1234567890abcdeffedcba09876543211234567890abcdeffedcba0987654321"
 
     cat ${S}/flatpak-fake-runtime.service.in | \
-        sed "s#@ARCH@#${_t%%-*}#g;s#@VERSION@#0.0.1#g;s#@ORG@#iot.refkit#g" \
+        sed "s#@ARCH@#$_m#g;s#@VERSION@#$_v#g;s#@ORG@#iot.refkit#g" \
             > ${S}/flatpak-fake-runtime.service
 
     cat ${S}/metadata.in | \
-        sed "s#@ARCH@#${_t%%-*}#g;s#@VERSION@#0.0.1#g" \
+        sed "s#@ARCH@#$_m#g;s#@VERSION@#$_v#g" \
             > ${S}/metadata
 
     cat ${S}/deploy.in | \
-        sed "s#@ARCH@#${_t%%-*}#g;s#@VERSION@#0.0.1#g;s#@SHA1@#${_v}#g" \
+        sed "s#@ARCH@#$_m#g;s#@VERSION@#$_v#g;s#@SHA1@#$_sha#g" \
             > ${S}/deploy
 }
 

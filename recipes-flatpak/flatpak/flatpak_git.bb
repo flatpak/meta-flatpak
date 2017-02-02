@@ -6,7 +6,7 @@ DEPENDS = " \
     ostree libassuan libgpg-error bubblewrap systemd \
 "
 
-RDEPENDS_${PN} = "bubblewrap"
+RDEPENDS_${PN} = "bubblewrap ca-certificates"
 
 EXTRA_OECONF += " \
     --disable-docbook-docs \

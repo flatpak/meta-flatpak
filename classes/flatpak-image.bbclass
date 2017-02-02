@@ -3,7 +3,7 @@ IMAGE_FEATURES[validitems] += " \
 "
 
 IMAGE_FEATURES += " \
-    ${@bb.utils.contains('DISTRO_FEATURES', 'flatpak', 'flatpak', '', d)} \
+    flatpak \
 "
 
 FEATURE_PACKAGES_flatpak = " \
@@ -12,6 +12,5 @@ FEATURE_PACKAGES_flatpak = " \
          if d.getVar('FLATPAK_APP_REPOS') else ''} \
 "
 
-inherit ${@bb.utils.contains('DISTRO_FEATURES', 'flatpak', \
-                             'flatpak-repo', '', d)}
+inherit flatpak-repo
 

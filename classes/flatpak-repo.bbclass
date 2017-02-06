@@ -7,19 +7,17 @@ REQUIRED_DISTRO_FEATURES_append = " usrmerge systemd pam"
 
 inherit flatpak-variables flatpak-keys
 
-# Guesstimate whether this is runtime or an SDK image.
-FLATPAK_RUNTIME = "${@bb.utils.contains('IMAGE_FEATURES', 'tools-sdk', \
-                                        'sdk', 'runtime', d)}"
-
 #
 # generating/populating flatpak repositories from/for images
 #
 
 do_flatpakrepo () {
+   IMAGE_BASENAME="${@d.getVar('IMAGE_BASENAME')}"
+
    #echo "WORKDIR:          ${@d.getVar('WORKDIR')}"
    #echo "DEPLOY_DIR_IMAGE: ${@d.getVar('DEPLOY_DIR_IMAGE')}"
    #echo "IMGDEPLOYDIR:     ${@d.getVar('IMGDEPLOYDIR')}"
-   echo "IMAGE_BASENAME:   ${@d.getVar('IMAGE_BASENAME')}"
+   echo "IMAGE_BASENAME:   $IMAGE_BASENAME"
    echo "IMAGE_NAME:       ${@d.getVar('IMAGE_NAME')}"
    #echo "BUILD_ID:         ${@d.getVar('BUILD_ID')}"
    #echo "D:                ${@d.getVar('D')}"
@@ -29,8 +27,13 @@ do_flatpakrepo () {
    #return 0
 
    # Bail out early if flatpak is not enabled.
-   HAS_FLATPAK="${@bb.utils.contains('IMAGE_FEATURES', 'flatpak', 'yes', '', d)}"
-   if [ "$HAS_FLATPAK" != "yes" ]; then
+   case $IMAGE_BASENAME in
+       *-flatpak-runtime) FLATPAK_RUNTIME=runtime;;
+       *-flatpak-sdk)     FLATPAK_RUNTIME=sdk;;
+       *)                 FLATPAK_RUNTIME=none;;
+   esac
+
+   if [ "$FLATPAK_RUNTIME" = "none" ]; then
        echo "Flatpak not enabled in image, skip repo generation..."
        return 0
    fi
@@ -46,7 +49,6 @@ do_flatpakrepo () {
    FLATPAK_REPO="${@d.getVar('FLATPAK_REPO')}"
    FLATPAK_EXPORT="${@d.getVar('FLATPAK_EXPORT')}"
    FLATPAK_DISTRO="${@d.getVar('FLATPAK_DISTRO')}"
-   FLATPAK_RUNTIME="${@d.getVar('FLATPAK_RUNTIME')}"
    FLATPAK_RUNTIME_IMAGE="${@d.getVar('FLATPAK_RUNTIME_IMAGE')}"
 
    if [ "$FLATPAK_RUNTIME" != "sdk" -a "$FLATPAK_RUNTIME_IMAGE" != "yes" ]; then

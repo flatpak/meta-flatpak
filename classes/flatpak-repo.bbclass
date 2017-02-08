@@ -68,6 +68,7 @@ do_flatpakrepo () {
        --repo-export $FLATPAK_EXPORT \
        --rolling-branch latest-build \
        --image-dir $FLATPAK_ROOTFS \
+       --image-base $IMAGE_BASENAME \
        --image-type $FLATPAK_RUNTIME \
        --image-arch $FLATPAK_ARCH \
        --image-version $VERSION \

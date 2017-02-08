@@ -11,11 +11,16 @@ FLATPAK_GPGID  ?= "iot-ref-kit@key"
 FLATPAK_DISTRO  = "${DISTRO}"
 
 # By default we trigger flatpak repository population/generation only
-# for images that can be used as flatpak SDK runtimes (i.e. images that
-# has tools-sdk enabled). You can enable repository generation for pure
-# runtime images by overriding ths variable and setting it to 'yes'.
-FLATPAK_RUNTIME_IMAGE ?= ""
-
+# for images that we configured to be suitable for flatpak-building
+# applications. These images will have a basename matching the value
+# of FLATPAK_IMAGE_PATTERN.
+#
+# You can override this to generate flatpak repositories also for
+# other images by overriding this variable. You can use either a
+# a regexp suitable for grep or a shell globbing pattern that will
+# match your image name. For globbing patterns, the value should be
+# prefixed with 'glob:'.
+FLATPAK_IMAGE_PATTERN ?= 'glob:*-flatpak-sdk'
 
 # You can pre-declare flatpak repositories/remotes for flatpak-enabled
 # images. Devices running such an image will monitor the remotes for

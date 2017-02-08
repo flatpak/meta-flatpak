@@ -13,6 +13,7 @@ inherit flatpak-variables flatpak-keys
 
 do_flatpakrepo () {
    IMAGE_BASENAME="${@d.getVar('IMAGE_BASENAME')}"
+   FLATPAK_IMAGE_PATTERN="${@d.getVar('FLATPAK_IMAGE_PATTERN')}"
 
    #echo "WORKDIR:          ${@d.getVar('WORKDIR')}"
    #echo "DEPLOY_DIR_IMAGE: ${@d.getVar('DEPLOY_DIR_IMAGE')}"
@@ -26,17 +27,26 @@ do_flatpakrepo () {
    #
    #return 0
 
-   # Bail out early if flatpak is not enabled.
+   # Bail out early if flatpak is not enabled for this image.
+   if [ "${FLATPAK_IMAGE_PATTERN%%:*}" == "glob" ]; then
+       case $IMAGE_BASENAME in
+           ${FLATPAK_IMAGE_PATTERN#glob:}) repo_enabled=yes;;
+           *)                              repo_enabled="";;
+       esac
+   else
+       repo_enabled=$(echo $IMAGE_BASENAME | grep "$FLATPAK_IMAGE_PATTERN" || :)
+   fi
+
+   if [ -z "$repo_enabled" ]; then
+       echo "Flatpak not enabled for $IMAGE_BASENAME, skip repo generation..."
+       return 0
+   fi
+
    case $IMAGE_BASENAME in
        *-flatpak-runtime) FLATPAK_RUNTIME=runtime;;
        *-flatpak-sdk)     FLATPAK_RUNTIME=sdk;;
        *)                 FLATPAK_RUNTIME=none;;
    esac
-
-   if [ "$FLATPAK_RUNTIME" = "none" ]; then
-       echo "Flatpak not enabled in image, skip repo generation..."
-       return 0
-   fi
 
    FLATPAKBASE="${@d.getVar('FLATPAKBASE')}"
    FLATPAK_TOPDIR="${@d.getVar('FLATPAK_TOPDIR')}"
@@ -50,11 +60,6 @@ do_flatpakrepo () {
    FLATPAK_EXPORT="${@d.getVar('FLATPAK_EXPORT')}"
    FLATPAK_DISTRO="${@d.getVar('FLATPAK_DISTRO')}"
    FLATPAK_RUNTIME_IMAGE="${@d.getVar('FLATPAK_RUNTIME_IMAGE')}"
-
-   if [ "$FLATPAK_RUNTIME" != "sdk" -a "$FLATPAK_RUNTIME_IMAGE" != "yes" ]; then
-       echo "Flatpak runtime image not enabled, skip repo generation..."
-       return 0
-   fi
 
    BUILD_ID="${@d.getVar('BUILD_ID')}"
    VERSION=$(cat $FLATPAK_ROOTFS/etc/version)

@@ -15,6 +15,19 @@ SRCREV = "a5536d0420df8a537ab8327319a431127b0ebed7"
 PV = "2016.8+git${SRCPV}"
 S = "${WORKDIR}/git"
 
+EXTRA_OECONF += " \
+    --disable-docbook-docs \
+    --disable-gtk-doc-html \
+    --disable-documentation \
+    --with-systemdsystemunitdir=${systemd_unitdir}/system \
+"
+
+PACKAGECONFIG ?= ""
+
+PACKAGECONFIG[seccomp] = "--enable-seccomp,--disable-seccomp,seccomp"
+PACKAGECONFIG[x11] = "--enable-xauth,--disable-xauth,x11"
+PACKAGECONFIG[system-helper] = "--enable-system-helper,--disable-system-helper,poklit"
+
 PACKAGES =+ " \
     ${PN}-build \
     ${PN}-bash-completion \
@@ -42,9 +55,6 @@ FILES_${PN}-gdm = " \
 "
 
 AUTO_LIBNAME_PKGS = ""
-
-# possible package configurations
-PACKAGECONFIG ??= ""
 
 do_configure_prepend() {
     cd ${S}

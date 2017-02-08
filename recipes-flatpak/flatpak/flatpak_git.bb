@@ -7,14 +7,3 @@ DEPENDS = " \
 "
 
 RDEPENDS_${PN} = "bubblewrap ca-certificates"
-
-EXTRA_OECONF += " \
-    --disable-docbook-docs \
-    --disable-gtk-doc-html \
-    --disable-documentation \
-    --disable-system-helper \
-    --disable-seccomp \
-    --disable-xauth \
-    --with-systemdsystemunitdir=${systemd_unitdir}/system \
-"
-

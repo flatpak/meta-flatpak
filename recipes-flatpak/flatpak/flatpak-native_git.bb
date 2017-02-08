@@ -7,14 +7,4 @@ DEPENDS = " \
     libassuan-native libgpg-error-native bubblewrap-native \
 "
 
-EXTRA_OECONF_class-native += " \
-    --disable-docbook-docs \
-    --disable-gtk-doc-html \
-    --disable-documentation \
-    --disable-system-helper \
-    --disable-seccomp \
-    --disable-xauth \
-    --with-systemdsystemunitdir=${systemd_unitdir}/system \
-"
-
 BBCLASSEXTEND = "native"

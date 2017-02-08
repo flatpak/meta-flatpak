@@ -21,6 +21,7 @@ print_usage () {
     echo "  --gpg-home <dir>     GPG home directory for keyring"
     echo "  --gpg-id <id>        GPG key id to use for signing"
     echo "  --image-dir <dir>    image directory to populate repository with"
+    echo "  --image-base <name>  image basename"
     echo "  --image-type <type>  image type (runtime or sdk)"
     echo "  --image-arch <arch>  image architecture (x86, x86-64, ...)"
     echo "  --image-version <v>  image version/branch [0.0.1]"
@@ -81,6 +82,10 @@ parse_command_line () {
                 IMG_BUILDID=$2
                 shift 2
                 ;;
+            --image-base|--base)
+                IMG_BASE=$2
+                shift 2
+                ;;
             --image-type|--type|-T)
                 IMG_TYPE=$2
                 shift 2
@@ -130,11 +135,16 @@ parse_command_line () {
     case $IMG_TYPE in
         runtime) BASE_TYPE=BasePlatform;;
         sdk)     BASE_TYPE=BaseSdk;;
+        none)    BASE_TYPE=BasePlatform;;
         *)
             echo "Invalid image type: $IMG_TYPE";
             exit 1
             ;;
     esac
+
+    if [ -z "$IMG_BASE" ]; then
+        IMG_BASE="image-unknown"
+    fi
 
     REPO_BRANCH=runtime/$REPO_ORG.$BASE_TYPE/$REPO_ARCH/$IMG_VERSION
     VERSION_BRANCH=version/$IMG_TYPE/$REPO_ARCH/$IMG_VERSION
@@ -281,11 +291,11 @@ repo_apache_config () {
     cd $REPO_EXPORT && _repo_path=$(pwd) && cd -
 
     echo "* Generating apache2 config fragment for $REPO_EXPORT..."
-    (echo "Alias \"/flatpak/\" \"$_repo_path/\""
+    (echo "Alias \"/flatpak/$IMG_BASE/$IMG_TYPE/\" \"$_repo_path/\""
      echo ""
      echo "<Directory $_repo_path>"
-     echo "Options Indexes FollowSymLinks"
-     echo "Require all granted"
+     echo "    Options Indexes FollowSymLinks"
+     echo "    Require all granted"
      echo "</Directory>") > $REPO_EXPORT.http.conf
 }
 

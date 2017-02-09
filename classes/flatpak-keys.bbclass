@@ -21,7 +21,6 @@ do_flatpakkeys () {
    IMAGE_BASENAME="${@d.getVar('IMAGE_BASENAME')}"
    FLATPAK_IMAGE_PATTERN="${@d.getVar('FLATPAK_IMAGE_PATTERN')}"
    FLATPAK_GPGDIR="${@d.getVar('FLATPAK_GPGDIR')}"
-   FLATPAK_GPGOUT="${@d.getVar('FLATPAK_GPGOUT')}"
    FLATPAK_GPGID="${@d.getVar('FLATPAK_GPGID')}"
 
    # Bail out if we don't need a key for this image.
@@ -46,8 +45,7 @@ do_flatpakkeys () {
    # Generate repository signing GPG keys.
    $FLATPAKBASE/scripts/gpg-keygen.sh \
        --home $FLATPAK_GPGDIR \
-       --output $FLATPAK_GPGOUT \
-       --id $FLATPAK_GPGID@key
+       --id $FLATPAK_GPGID
 }
 
 do_flatpakkeys[depends] += " \
@@ -56,7 +54,6 @@ do_flatpakkeys[depends] += " \
 
 do_flatpakkeys[vardeps] += " \
     FLATPAK_GPGDIR \
-    FLATPAK_GPGOUT \
     FLATPAK_GPGID \
 "
 

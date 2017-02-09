@@ -6,8 +6,8 @@ FLATPAK_ARCH    = "${MACHINE}"
 FLATPAK_REPO    = "${IMGDEPLOYDIR}/${IMAGE_BASENAME}-${BUILD_ID}.flatpak"
 FLATPAK_EXPORT ?= "${TOPDIR}/${IMAGE_BASENAME}.flatpak"
 FLATPAK_GPGDIR ?= "${TOPDIR}/gpg"
-FLATPAK_GPGID  ?= "${@(d.getVar('IMAGE_BASENAME') or '').split('-flatpak')[0]}"
-FLATPAK_GPGOUT ?= "${FLATPAK_GPGID}"
+FLATPAK_GPGID  ?= "${@(d.getVar('IMAGE_BASENAME') or \
+                                                  '').split('-flatpak')[0]}@key"
 FLATPAK_DISTRO  = "${DISTRO}"
 
 # By default we trigger flatpak repository population/generation only

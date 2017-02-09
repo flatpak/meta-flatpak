@@ -18,19 +18,36 @@ do_flatpakkeys () {
    fi
 
    FLATPAKBASE="${@d.getVar('FLATPAKBASE')}"
+   IMAGE_BASENAME="${@d.getVar('IMAGE_BASENAME')}"
+   FLATPAK_IMAGE_PATTERN="${@d.getVar('FLATPAK_IMAGE_PATTERN')}"
    FLATPAK_GPGDIR="${@d.getVar('FLATPAK_GPGDIR')}"
    FLATPAK_GPGOUT="${@d.getVar('FLATPAK_GPGOUT')}"
    FLATPAK_GPGID="${@d.getVar('FLATPAK_GPGID')}"
 
-   # Generate repo signing GPG keys if we don't have them yet.
-   if [ ! -d $FLATPAK_GPGDIR ]; then
-       $FLATPAKBASE/scripts/gpg-keygen.sh \
-           --home $FLATPAK_GPGDIR \
-           --output $FLATPAK_GPGOUT \
-           --id $FLATPAK_GPGID
+   # Bail out if we don't need a key for this image.
+   if [ "${FLATPAK_IMAGE_PATTERN%%:*}" == "glob" ]; then
+       case $IMAGE_BASENAME in
+           ${FLATPAK_IMAGE_PATTERN#glob:}) repo_enabled=yes;;
+           *)                              repo_enabled="";;
+       esac
    else
-       echo "Will (re)use existing GPG keys from $FLATPAK_GPGDIR."
+       repo_enabled=$(echo $IMAGE_BASENAME | grep "$FLATPAK_IMAGE_PATTERN" || :)
    fi
+
+   if [ -z "$repo_enabled" ]; then
+       echo "Flatpak not enabled for $IMAGE_BASENAME, skip key generation..."
+       return 0
+   fi
+
+   if [ -z "$FLATPAK_GPGID" ]; then
+       FLATPAK_GPGID="${IMAGE_BASENAME:-unknown-image}"
+   fi
+
+   # Generate repository signing GPG keys.
+   $FLATPAKBASE/scripts/gpg-keygen.sh \
+       --home $FLATPAK_GPGDIR \
+       --output $FLATPAK_GPGOUT \
+       --id $FLATPAK_GPGID@key
 }
 
 do_flatpakkeys[depends] += " \

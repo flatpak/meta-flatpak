@@ -81,6 +81,15 @@ parse_command_line () {
     fi
 }
 
+# Check if the requested keys already exist.
+gpg1_chkkeys ()
+{
+    if [ -e $GPG_BASE.pub -a -e $GPG_BASE.sec ]; then
+        echo "* GPG keys $GPG_BASE.{pub,sec} exist, nothing to do..."
+        exit 0
+    fi
+}
+
 # Generate GPG --batch mode key generation configuration file (unless given).
 gpg1_mkconfig () {
     if [ -n "$GPG_CONFIG" ]; then
@@ -148,6 +157,7 @@ set -e
 
 parse_command_line $*
 
+gpg1_chkkeys
 gpg1_mkconfig
 gpg1_genkeys
 gpg2_import

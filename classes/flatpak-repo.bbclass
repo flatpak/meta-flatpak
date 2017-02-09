@@ -54,7 +54,6 @@ do_flatpakrepo () {
    FLATPAK_ROOTFS="${@d.getVar('FLATPAK_ROOTFS')}"
    FLATPAK_ARCH="${@d.getVar('FLATPAK_ARCH')}"
    FLATPAK_GPGDIR="${@d.getVar('FLATPAK_GPGDIR')}"
-   FLATPAK_GPGOUT="${@d.getVar('FLATPAK_GPGOUT')}"
    FLATPAK_GPGID="${@d.getVar('FLATPAK_GPGID')}"
    FLATPAK_REPO="${@d.getVar('FLATPAK_REPO')}"
    FLATPAK_EXPORT="${@d.getVar('FLATPAK_EXPORT')}"

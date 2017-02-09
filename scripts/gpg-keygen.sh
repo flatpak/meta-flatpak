@@ -9,13 +9,13 @@ print_usage () {
     echo ""
     echo "The possible options are:"
     echo "    -c <config>  use provided GPG config file, ignore other options."
-    echo "    -o <output>  file(s) to store keys in (<output>.{cfg,sec,pub})"
+    echo "    -m <mail>    e-mail address for the key (iot-ref-kit@key)"
+    echo "    -o <output>  file(s) to store keys in (${mail%@*}.{cfg,sec,pub})"
+    echo "    -n <name>    real name associated with the generated key"
     echo "    -T <type>    type of key to generate (DSA)"
     echo "    -L <len>     length of key to generate (2048)"
     echo "    -t <subtype> type of subkey to generate (ELG-E)"
     echo "    -l <sublen>  length of subkey to generate (2048)"
-    echo "    -n <name>    real name associated with the generated key"
-    echo "    -m <mail>    e-mail address associated with the genrated key"
     echo "    -H <home>    GPG home directory for the keyring."
     echo "    -2           import keys to GPG2 keyring as well"
     echo "    -h           show this help"
@@ -41,10 +41,6 @@ parse_command_line () {
                 GPG_SUBLENGTH="$2"
                 shift 2
                 ;;
-            --name|-n)
-                GPG_NAME="$2"
-                shift 2;
-                ;;
             --id|--email|-e|--mail|-m)
                 GPG_ID="$2"
                 shift 2
@@ -52,6 +48,10 @@ parse_command_line () {
             --output|-o|--base)
                 GPG_BASE="$2"
                 shift 2
+                ;;
+            --name|-n)
+                GPG_NAME="$2"
+                shift 2;
                 ;;
             --config|-c)
                 GPG_CONFIG="$2"
@@ -77,8 +77,25 @@ parse_command_line () {
     done
 
     if [ -z "$GPG_ID" ]; then
-        GPG_ID="$GPG_BASE@key"
+        GPG_ID="iot-ref-kit@key"
+    else
+        if [ "${GPG_ID##*@}" = "$GPG_ID" ]; then
+            GPG_ID="$GPG_ID@key"
+        fi
     fi
+
+    if [ -z "$GPG_BASE" ]; then
+        GPG_BASE="${GPG_ID%%@*}"
+    fi
+
+    if [ -z "$GPG_NAME" ]; then
+        GPG_NAME="Signing Key for ${GPG_BASE%%@*}"
+    fi
+
+    echo "* GPG key parameters:"
+    echo "    - ID: $GPG_ID"
+    echo "    - name: $GPG_NAME"
+    echo "    - files: $GPG_BASE.{cfg,pub,sec}"
 }
 
 # Check if the requested keys already exist.
@@ -148,9 +165,10 @@ GPG_TYPE="DSA"
 GPG_LENGTH="2048"
 GPG_SUBTYPE="ELG-E"
 GPG_SUBLENGTH="2048"
-GPG_NAME="IoT RefKit Signing Key"
-GPG_BASE="iot-refkit"
 GPG_HOME=".gpg.flatpak"
+GPG_BASE=""
+GPG_ID=""
+GPG_NAME=""
 GPG2_IMPORT=""
 
 set -e

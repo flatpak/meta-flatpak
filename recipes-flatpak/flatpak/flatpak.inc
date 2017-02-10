@@ -4,15 +4,15 @@ LICENSE = "LGPLv2.1"
 LIC_FILES_CHKSUM = "file://COPYING;md5=4fbd65380cdd255951079008b364516c"
 
 SRC_URI = " \
-    gitsm://git@github.com/flatpak/flatpak;protocol=https \
+    gitsm://git@github.com/flatpak/flatpak;protocol=https;branch=flatpak-0.8.x \
     file://0001-autogen.sh-fall-back-to-no-gtkdocize-if-it-is-there-.patch \
     file://0001-common-Allow-command-to-include-command-line-options.patch \
     file://0001-lib-Allow-passing-command-line-argument-through-laun.patch \
 "
 
-SRCREV = "a5536d0420df8a537ab8327319a431127b0ebed7"
+SRCREV = "3bd1405364a3c2cb0ffd3ccaf7e75c9a905db44f"
 
-PV = "2016.8+git${SRCPV}"
+PV = "0.8.2+git${SRCPV}"
 S = "${WORKDIR}/git"
 
 EXTRA_OECONF += " \

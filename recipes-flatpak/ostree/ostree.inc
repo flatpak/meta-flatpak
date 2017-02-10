@@ -7,11 +7,12 @@ LIC_FILES_CHKSUM = "file://COPYING;md5=5f30f0716dfdd0d91eb439ebec522ec2"
 SRC_URI = " \
     gitsm://git@github.com/ostreedev/ostree;protocol=https \
     file://0001-autogen.sh-fall-back-to-no-gtkdocize-if-it-is-there-.patch \
+    file://0001-libostree-fix-missing-macros-when-compiling-without-.patch \
 "
 
-SRCREV = "c9d565a5a9b435b5d3ed64a96c14a1c110698f4c"
+SRCREV = "6517a8a27a1386e7cb5482e7cb2919fe92721ccf"
 
-PV = "2016.15+git${SRCPV}"
+PV = "2017.1+git${SRCPV}"
 S = "${WORKDIR}/git"
 
 inherit autotools pkgconfig gobject-introspection

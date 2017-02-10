@@ -1,0 +1,28 @@
+From 75a6a8141deaf4d73343253a9bb17111e9c3e8ad Mon Sep 17 00:00:00 2001
+From: Krisztian Litkey <krisztian.litkey@intel.com>
+Date: Fri, 10 Feb 2017 14:14:27 +0200
+Subject: [PATCH 1/1] libostree: fix missing macros when compiling without
+ libarchive.
+
+Signed-off-by: Krisztian Litkey <krisztian.litkey@intel.com>
+---
+ src/libostree/ostree-libarchive-private.h | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/src/libostree/ostree-libarchive-private.h b/src/libostree/ostree-libarchive-private.h
+index 177c656..865a4b8 100644
+--- a/src/libostree/ostree-libarchive-private.h
++++ b/src/libostree/ostree-libarchive-private.h
+@@ -37,6 +37,9 @@ GLNX_DEFINE_CLEANUP_FUNCTION (void *, flatpak_local_free_write_archive, archive_
+ 
+ GLNX_DEFINE_CLEANUP_FUNCTION (void *, flatpak_local_free_read_archive, archive_read_free)
+ #define ot_cleanup_read_archive __attribute__((cleanup (flatpak_local_free_read_archive)))
++#else
++#define ot_cleanup_write_archive
++#define ot_cleanup_read_archive
+ #endif
+ 
+ G_END_DECLS
+-- 
+2.9.3
+

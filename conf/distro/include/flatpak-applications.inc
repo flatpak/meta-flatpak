@@ -13,3 +13,7 @@ PACKAGECONFIG_append_pn-dbus = " user-session"
 # usrmerge currently breaks gobject introspection data generation. Disable
 # it for now. Can be removed once this gets fixed.
 DISTRO_FEATURES_BACKFILL_CONSIDERED_append = " gobject-introspection-data"
+
+# This could/should be in our distro.conf... 2.4.x is GPLv3.
+PREFERRED_VERSION_gnupg = "${@bb.utils.contains('DISTRO_FEATURES', 'flatpak', \
+                                                '1.%', '%', d)}"

@@ -6,4 +6,7 @@ DEPENDS = " \
     libcap-native fuse-native libarchive-native zlib-native xz-native \
 "
 
-EXTRA_OECONF_class-native += "--disable-man"
+EXTRA_OECONF_class-native += " \
+    --disable-man \
+    --with-builtin-grub2-mkconfig \
+"

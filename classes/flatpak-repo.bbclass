@@ -7,6 +7,19 @@ REQUIRED_DISTRO_FEATURES_append = " usrmerge systemd pam"
 
 inherit flatpak-variables flatpak-keys
 
+# Declare our extra test cases. Also declare a few extra variables
+# we (might eventually) use in our test cases, so we want them
+# exported and accessible in builddata. These won't have any effect
+# unless test-iot.bbclass in inherited by local.conf or the images.
+IOTQA_EXTRA_TESTS += " \
+    oeqa.runtime.sanity.flatpak:refkit-image-minimal-flatpak-sdk \
+"
+
+IOTQA_EXTRA_BUILDDATA += " \
+    IMAGE_BASENAME \
+    FLATPAK_IMAGE_PATTERN \
+"
+
 #
 # generating/populating flatpak repositories from/for images
 #

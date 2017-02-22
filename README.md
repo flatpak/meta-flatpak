@@ -113,8 +113,8 @@ are started in the order of discovery.
 At the moment the easiest way to test meta-flatpak is to use the pre-
 configured repository found at http://github.com/klihub/intel-iot-refkit.
 This repository is a clone/fork of http://github.com/intel/intel-iot-refkit
-with a few necessary patches and the OSTree and flatpak layers added on top
-using git submodules.
+with a few necessary patches and the flatpak layer added on top using git
+submodules.
 
 
 ## Getting The Necessary Bits In Place
@@ -142,27 +142,22 @@ git submodule init
 git submodule update --recursive
 ```
 
-* add meta-flatpak and meta-ostree submodules
+* add meta-flatpak submodule
 
 ```
 # add meta-flatpak
 git submodule add https://github.com/klihub/meta-flatpak
 
-# add meta-ostree if you'd like to use OSTree from there
-git submodule add https://github.com/klihub/meta-ostree
-
 # pull in the newly added git submodules
 git submodule update --recursive
 ```
 
-* add meta-flatpak and meta-ostree as bitbake layers
+* add meta-flatpak as a bitbake layer
 
 ```
 # let bitbake know about the new layers
 . ./refkit-init-build-env
 bitbake-layers add-layer ../meta-flatpak
-# if you chose to pull in also meta-ostree
-bitbake-layers add-layer ../meta-ostree
 ```
 
 * apply the patch the following patch adding flatpak support to refkit images
@@ -417,7 +412,7 @@ You should be able to see now your newly added remote repository when you
 list the available remotes on your machine:
 
 ```
-madark build $ flatpak remote-list
+mandark build $ flatpak remote-list
 gnome                           
 refkit-image-minimal-flatpak-sdk
 refkit-runtime                  
@@ -644,16 +639,10 @@ Last login: Fri Feb 10 17:32:37 2017
 *** Do not use in production.    ***
 ************************************
 root@qemux86-64:~# flatpak remote-add test --gpg-import=refkit-image-minimal.pub
---no-enumerate http://192.168.7.1/apps/vim.flatpak
+http://192.168.7.1/apps/vim.flatpak
 root@qemux86-64:~# flatpak remote-ls -d test
 app/org.vim.vim/x86_64/master f15cb7341253
 ```
-
-Note that we marked the remote as unenumerated one. This means, that this
-remote, by default, will not show up in remote lists and applications from
-this remote will not show up in application lists. The reason for this will
-become clear in the next chapter where we discuss additional functionality
-provided by meta-flatpak.
 
 If all went fine and you were able to list the applications, you can now
 install vim as a flatpak:

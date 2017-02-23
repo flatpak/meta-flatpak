@@ -7,7 +7,7 @@ LIC_FILES_CHKSUM = " \
 "
 
 # Lazy bastards' cheat to get iconv
-DEPENDS = "glib-2.0"
+DEPENDS = "glib-2.0 gettext"
 
 SRC_URI = "git://git@github.com/libfuse/libfuse;protocol=https;branch=fuse-2_9_bugfix"
 # Flatpak ATM requires fuse 2.9. 3.0 does not provide a backward-compatible
@@ -31,10 +31,13 @@ PACKAGECONFIG ??= ""
 FUSE_MOUNT_PATH = "${@bb.utils.contains('DISTRO_FEATURES', 'usrmerge', \
                    '/usr/sbin', '/sbin', d)}"
 
+FUSE_CONFIG_RPATH_class-target = "${RECIPE_SYSROOT}${datadir}/gettext/config.rpath"
+FUSE_CONFIG_RPATH_class-native = "${datadir}/gettext/config.rpath"
+
 do_configure_prepend() {
     cd ${S}
-    export MOUNT_FUSE_PATH="${FUSE_MOUNT_PATH}"
-    ./makeconf.sh
+      export MOUNT_FUSE_PATH="${FUSE_MOUNT_PATH}"
+      cp ${FUSE_CONFIG_RPATH} . && autoreconf -i
     cd -
 }
 

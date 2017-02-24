@@ -1,3 +1,5 @@
-require ../../common/extend-native.inc
+FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
 
 DEPENDS += "glib-networking"
+
+BBCLASSEXTEND = "native"

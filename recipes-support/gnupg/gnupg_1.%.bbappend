@@ -1,4 +1,4 @@
-require ../../common/extend-native.inc
+FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
 
 # libmpi needs gnu89 extern inline semantics.
 # AFAIK, the in-recipe kludge of 'CFLAGS += "-fgnu89-inline"' is
@@ -20,3 +20,6 @@ do_configure_prepend () {
 # up we need to replace the original dependency with a class-target one.
 RDEPENDS_${PN}_remove = "gpgv"
 RDEPENDS_${PN}_class-target = "gpgv"
+
+BBCLASSEXTEND = "native"
+

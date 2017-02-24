@@ -1,1 +1,3 @@
-require ../../common/extend-native.inc
+FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
+
+BBCLASSEXTEND = "native"

@@ -15,9 +15,9 @@ SRCREV = "3bd1405364a3c2cb0ffd3ccaf7e75c9a905db44f"
 PV = "0.8.2+git${SRCPV}"
 S = "${WORKDIR}/git"
 
-inherit native autotools pkgconfig gettext systemd gobject-introspection
+inherit autotools pkgconfig gettext systemd gobject-introspection
 
-DEPENDS_class-target = " \
+DEPENDS = " \
     glib-2.0 json-glib libsoup-2.4 libarchive elfutils fuse \
     ostree libassuan libgpg-error bubblewrap systemd \
 "

@@ -15,9 +15,9 @@ SRCREV = "6517a8a27a1386e7cb5482e7cb2919fe92721ccf"
 PV = "2017.1+git${SRCPV}"
 S = "${WORKDIR}/git"
 
-inherit native autotools pkgconfig systemd gobject-introspection
+inherit autotools pkgconfig systemd gobject-introspection
 
-DEPENDS_class-target = " \
+DEPENDS = " \
     glib-2.0 libsoup-2.4 gpgme e2fsprogs \
     libcap fuse libarchive zlib xz \
     systemd \

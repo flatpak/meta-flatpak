@@ -1,6 +1,7 @@
 bubblewrap@flatpak
 ca-certificates@flatpak
 flatpak-fake-runtime@flatpak
+flatpak-image-runtime@flatpak
 flatpak-predefined-repos@flatpak
 flatpak-utils@flatpak
 flatpak@flatpak

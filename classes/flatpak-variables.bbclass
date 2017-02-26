@@ -4,11 +4,30 @@ FLATPAK_TMPDIR  = "${TOPDIR}/tmp-glibc"
 FLATPAK_ROOTFS  = "${IMAGE_ROOTFS}"
 FLATPAK_ARCH    = "${MACHINE}"
 FLATPAK_REPO    = "${IMGDEPLOYDIR}/${IMAGE_BASENAME}-${BUILD_ID}.flatpak"
+FLATPAK_DISTRO  = "${DISTRO}"
+
+# This is where we export our builds (matching FLATPAK_IMAGE_PATTERN) in
+# archive-z2 format. This repository can be exposed over HTTP for clients.
+# By default it goes under the top build directory.
 FLATPAK_EXPORT ?= "${TOPDIR}/${IMAGE_BASENAME}.flatpak"
+
+# This is where our GPG keyring is generated/located and the default
+# key ID we use to sign (commits in) the repository.
 FLATPAK_GPGDIR ?= "${TOPDIR}/gpg"
 FLATPAK_GPGID  ?= "${@(d.getVar('IMAGE_BASENAME') or \
                                                   '').split('-flatpak')[0]}@key"
-FLATPAK_DISTRO  = "${DISTRO}"
+
+# By default we publish two 'version' branches in our flatpak repositories:
+# One is a rolling release, the 'current' version. The other is derived from
+# the distro version, by default stripping the trailing +snapshot.* suffix.
+# flatpak repositories. One is 'current. These are available in all builds,
+# not just image builds. The third one, build, is only available in image
+# builds.
+FLATPAK_CURRENT ?= "current"
+FLATPAK_VERSION ?= "${@(d.getVar('DISTRO_VERSION') or \
+                                                  0.0).split('+snapshot')[0]}"
+FLATPAK_BUILD    = "${BUILD_ID}"
+
 
 # By default we trigger flatpak repository population/generation only
 # for images that we configured to be suitable for flatpak-building

@@ -4,5 +4,5 @@ LICENSE = "MIT"
 inherit packagegroup
 
 RDEPENDS_${PN} = " \
-    flatpak flatpak-utils flatpak-fake-runtime \
+    flatpak flatpak-utils flatpak-image-runtime \
 "

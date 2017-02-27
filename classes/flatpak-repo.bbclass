@@ -28,17 +28,9 @@ do_flatpakrepo () {
    IMAGE_BASENAME="${@d.getVar('IMAGE_BASENAME')}"
    FLATPAK_IMAGE_PATTERN="${@d.getVar('FLATPAK_IMAGE_PATTERN')}"
 
-   #echo "WORKDIR:          ${@d.getVar('WORKDIR')}"
-   #echo "DEPLOY_DIR_IMAGE: ${@d.getVar('DEPLOY_DIR_IMAGE')}"
-   #echo "IMGDEPLOYDIR:     ${@d.getVar('IMGDEPLOYDIR')}"
-   echo "IMAGE_BASENAME:   $IMAGE_BASENAME"
-   echo "IMAGE_NAME:       ${@d.getVar('IMAGE_NAME')}"
-   #echo "BUILD_ID:         ${@d.getVar('BUILD_ID')}"
-   #echo "D:                ${@d.getVar('D')}"
-   #echo "S:                ${@d.getVar('S')}"
-   #echo "FLATPAK_DISTRO:   ${@d.getVar('FLATPAK_DISTRO')}"
-   #
-   #return 0
+   echo "Flatpak repository population:"
+   echo "  * IMAGE_BASENAME: $IMAGE_BASENAME"
+   echo "  * IMAGE_NAME:     ${@d.getVar('IMAGE_NAME')}"
 
    # Bail out early if flatpak is not enabled for this image.
    if [ "${FLATPAK_IMAGE_PATTERN%%:*}" == "glob" ]; then
@@ -69,11 +61,11 @@ do_flatpakrepo () {
    FLATPAK_GPGDIR="${@d.getVar('FLATPAK_GPGDIR')}"
    FLATPAK_GPGID="${@d.getVar('FLATPAK_GPGID')}"
    FLATPAK_REPO="${@d.getVar('FLATPAK_REPO')}"
-   FLATPAK_EXPORT="${@d.getVar('FLATPAK_EXPORT')}"
    FLATPAK_DISTRO="${@d.getVar('FLATPAK_DISTRO')}"
    FLATPAK_RUNTIME_IMAGE="${@d.getVar('FLATPAK_RUNTIME_IMAGE')}"
+   FLATPAK_CURRENT="${@d.getVar('FLATPAK_CURRENT')}"
+   FLATPAK_VERSION="${@d.getVar('FLATPAK_VERSION')}"
 
-   BUILD_ID="${@d.getVar('BUILD_ID')}"
    VERSION=$(cat $FLATPAK_ROOTFS/etc/version)
 
    # Generate/populate flatpak/OSTree repository
@@ -82,16 +74,17 @@ do_flatpakrepo () {
        --gpg-id $FLATPAK_GPGID \
        --repo-path $FLATPAK_REPO \
        --repo-mode bare-user \
-       --repo-export $FLATPAK_EXPORT \
-       --rolling-branch latest-build \
+       --repo-org "iot.$FLATPAK_DISTRO" \
        --image-dir $FLATPAK_ROOTFS \
        --image-base $IMAGE_BASENAME \
        --image-type $FLATPAK_RUNTIME \
        --image-arch $FLATPAK_ARCH \
        --image-version $VERSION \
-       --image-buildid $BUILD_ID \
+       --distro-version $FLATPAK_VERSION \
+       --rolling-version $FLATPAK_CURRENT \
        --tmp-dir $FLATPAK_TMPDIR
 }
+
 
 do_flatpakrepo[depends] += " \
     ostree-native:do_populate_sysroot \
@@ -102,24 +95,105 @@ do_flatpakrepo[vardeps] += " \
     FLATPAK_GPGDIR \
     FLATPAK_GPGID \
     FLATPAK_REPO \
-    FLATPAK_EXPORT \
+    FLATPAK_DISTRO \
+    FLATPAK_CURRENT \
     FLATPAK_ROOTFS \
+    IMAGE_BASENAME \
     FLATPAK_RUNTIME \
     FLATPAK_ARCH \
     VERSION \
-    BUILD_ID \
 "
 
-SSTATETASKS += "do_flatpakrepo"
-do_flatpakrepo[sstate-inputdirs]  = "${IMGDEPLOYDIR}"
-do_flatpakrepo[sstate-outputdirs] = "${DEPLOY_DIR_IMAGE}"
 
-python do_flatpakrepo_setscene () {
-    sstate_setscene(d)
+#
+# exporting image to archive-z2 repository
+#
+do_flatpakexport () {
+   FLATPAK_EXPORT="${@d.getVar('FLATPAK_EXPORT')}"
+
+   # Bail out early if no export repository is defined.
+   if [ -z "$FLATPAK_EXPORT" ]; then
+       echo "Flatpak repository for export not specified, skip export..."
+       return 0
+   fi
+
+   IMAGE_BASENAME="${@d.getVar('IMAGE_BASENAME')}"
+   FLATPAK_IMAGE_PATTERN="${@d.getVar('FLATPAK_IMAGE_PATTERN')}"
+
+   echo "Flatpak repository exporting:"
+   echo " * IMAGE_BASENAME: $IMAGE_BASENAME"
+   echo " * IMAGE_NAME:     ${@d.getVar('IMAGE_NAME')}"
+
+   # Bail out early if flatpak is not enabled for this image.
+   if [ "${FLATPAK_IMAGE_PATTERN%%:*}" == "glob" ]; then
+       case $IMAGE_BASENAME in
+           ${FLATPAK_IMAGE_PATTERN#glob:}) repo_enabled=yes;;
+           *)                              repo_enabled="";;
+       esac
+   else
+       repo_enabled=$(echo $IMAGE_BASENAME | grep "$FLATPAK_IMAGE_PATTERN" || :)
+   fi
+
+   if [ -z "$repo_enabled" ]; then
+       echo "Flatpak not enabled for $IMAGE_BASENAME, skip repo export..."
+       return 0
+   fi
+
+   case $IMAGE_BASENAME in
+       *-flatpak-runtime) FLATPAK_RUNTIME=runtime;;
+       *-flatpak-sdk)     FLATPAK_RUNTIME=sdk;;
+       *)                 FLATPAK_RUNTIME=none;;
+   esac
+
+   FLATPAKBASE="${@d.getVar('FLATPAKBASE')}"
+   FLATPAK_TOPDIR="${@d.getVar('FLATPAK_TOPDIR')}"
+   FLATPAK_TMPDIR="${@d.getVar('FLATPAK_TMPDIR')}"
+   FLATPAK_ROOTFS="${@d.getVar('FLATPAK_ROOTFS')}"
+   FLATPAK_ARCH="${@d.getVar('FLATPAK_ARCH')}"
+   FLATPAK_GPGDIR="${@d.getVar('FLATPAK_GPGDIR')}"
+   FLATPAK_GPGID="${@d.getVar('FLATPAK_GPGID')}"
+   FLATPAK_REPO="${@d.getVar('FLATPAK_REPO')}"
+   FLATPAK_DISTRO="${@d.getVar('FLATPAK_DISTRO')}"
+   FLATPAK_RUNTIME_IMAGE="${@d.getVar('FLATPAK_RUNTIME_IMAGE')}"
+   FLATPAK_CURRENT="${@d.getVar('FLATPAK_CURRENT')}"
+   FLATPAK_VERSION="${@d.getVar('FLATPAK_VERSION')}"
+
+   VERSION=$(cat $FLATPAK_ROOTFS/etc/version)
+
+   # Export to archive-z2 flatpak/OSTree repository
+   $FLATPAKBASE/scripts/populate-repo.sh \
+       --gpg-home $FLATPAK_GPGDIR \
+       --gpg-id $FLATPAK_GPGID \
+       --repo-path $FLATPAK_REPO \
+       --repo-export $FLATPAK_EXPORT \
+       --repo-org "iot.$FLATPAK_DISTRO" \
+       --image-dir $FLATPAK_ROOTFS \
+       --image-base $IMAGE_BASENAME \
+       --image-type $FLATPAK_RUNTIME \
+       --image-arch $FLATPAK_ARCH \
+       --image-version $VERSION \
+       --distro-version $FLATPAK_VERSION \
+       --rolling-version $FLATPAK_CURRENT \
+       --tmp-dir $FLATPAK_TMPDIR \
+       export
 }
 
-addtask do_flatpakrepo_setscene
-addtask flatpakrepo after do_rootfs # before do_image
+
+#SSTATETASKS += "do_flatpakrepo"
+#do_flatpakrepo[sstate-inputdirs]  = "${IMGDEPLOYDIR}"
+#do_flatpakrepo[sstate-outputdirs] = "${DEPLOY_DIR_IMAGE}"
+#
+#python do_flatpakrepo_setscene () {
+#    sstate_setscene(d)
+#}
+#
+
+#addtask do_flatpakrepo_setscene
+
+addtask do_flatpakrepo after do_rootfs before do_image_complete
+addtask do_flatpakexport after do_flatpakrepo before do_image_complete
+
+
 
 #
 # Alternatively we could treat flatpak repositories as just another

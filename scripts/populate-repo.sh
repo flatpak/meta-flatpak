@@ -13,22 +13,22 @@ print_usage () {
     echo "fetch data from."
     echo ""
     echo "The other possible options are:"
-    echo "  --repo-path <repo>   path to flatpak repository to populate"
-    echo "  --repo-mode <type>   repository mode [archive-z2]"
-    echo "  --repo-org <org>     how to name runtime and branches [iot.refkit]"
-    echo "  --repo-export <exp>  export the image also to archive-z2 <exp>"
-    echo "  --rolling-branch <b> export also as rolling branch <b>"
-    echo "  --gpg-home <dir>     GPG home directory for keyring"
-    echo "  --gpg-id <id>        GPG key id to use for signing"
-    echo "  --image-dir <dir>    image directory to populate repository with"
-    echo "  --image-base <name>  image basename"
-    echo "  --image-type <type>  image type (runtime or sdk)"
-    echo "  --image-arch <arch>  image architecture (x86, x86-64, ...)"
-    echo "  --image-version <v>  image version/branch [0.0.1]"
-    echo "  --image-buildid <b>  create branch also for build-id <b>"
-    echo "  --image-libs <path>  image library list, if any, to generate"
-    echo "  --tmp-dir <path>     directory for temporary files (/tmp)"
-    echo "  --help               print this help and exit"
+    echo "  --repo-path <repo>    path to flatpak repository to populate"
+    echo "  --repo-mode <type>    repository mode [archive-z2]"
+    echo "  --repo-org <org>      how to name runtime and branches [iot.refkit]"
+    echo "  --repo-export <exp>   export the image also to archive-z2 <exp>"
+    echo "  --gpg-home <dir>      GPG home directory for keyring"
+    echo "  --gpg-id <id>         GPG key id to use for signing"
+    echo "  --image-dir <dir>     image directory to populate repository with"
+    echo "  --image-base <name>   image basename"
+    echo "  --image-type <type>   image type (runtime or sdk)"
+    echo "  --image-arch <arch>   image architecture (x86, x86-64, ...)"
+    echo "  --image-version <v>   image version/branch [0.0.1]"
+    echo "  --distro-version <v>  distro version/branch"
+    echo "  --rolling-version <v> rolling version/branch [current]"
+    echo "  --image-libs <path>   image library list, if any, to generate"
+    echo "  --tmp-dir <path>      directory for temporary files (/tmp)"
+    echo "  --help                print this help and exit"
 }
 
 # Parse the command line.
@@ -52,11 +52,6 @@ parse_command_line () {
                 shift 2
                 ;;
 
-            --rolling-branch)
-                ROLLING_BRANCH=$2
-                shift 2
-                ;;
-
             --gpg-home|--gpg-homedir|-G)
                 GPG_HOME=$2
                 shift 2
@@ -74,12 +69,16 @@ parse_command_line () {
                 IMG_ARCH=$2
                 shift 2
                 ;;
+            --distro-version)
+                DISTRO_VERSION=$2
+                shift 2
+                ;;
             --image-version|--version|-V)
                 IMG_VERSION=$2
                 shift 2
                 ;;
-            --image-buildid|--buildid|-B)
-                IMG_BUILDID=$2
+            --rolling-version)
+                ROLLING_VERSION=$2
                 shift 2
                 ;;
             --image-base|--base)
@@ -105,26 +104,42 @@ parse_command_line () {
                 exit 0
                 ;;
 
-            *)
+            -*)
                 echo "Unknown command line option/argument $1."
                 print_usage
                 exit 1
                 ;;
+
+             *)
+                actions="$actions $1"
+                shift
+                ;;
         esac
     done
 
-    #REPO_ARCH=${IMG_ARCH#qemu}
-    #REPO_ARCH=${REPO_ARCH//-/_}
-    #echo "REPO_ARCH: $REPO_ARCH"
+    if [ -z "$actions" ]; then
+        if [ -n "$REPO_EXPORT" ]; then
+            actions="populate export"
+        else
+            actions="populate"
+        fi
+    fi
+
+    if [ -z "$ROLLING_VERSION$DISTRO_VERSION$IMG_VERSION" ]; then
+        ROLLING_VERSION="current"
+    fi
 
     case $IMG_ARCH in
-        qemux86-64) REPO_ARCH=x86_64;    QEMU_ARCH=qemux86-64;;
-        qemux86)    REPO_ARCH=x86;       QEMU_ARCH=qemux86;;
-        intel*64)   REPO_ARCH=x86_64;    QEMU_ARCH=qemux86-64;;
-        intel*)     REPO_ARCH=x86;       QEMU_ARCH=qemux86;;
-        x86_64)     REPO_ARCH=x86_64;    QEMU_ARCH=qemux86-64;;
-        x86)        REPO_ARCH=x86;       QEMU_ARCH=qemux86;;
-        *)          REPO_ARCH=$IMG_ARCH; QEMU_ARCH=$IMG_ARCH;;
+        qemux86-64) REPO_ARCH=x86_64;;
+        intel*64)   REPO_ARCH=x86_64;;
+        x86_64)     REPO_ARCH=x86_64;;
+        qemux86-32) REPO_ARCH=x86_32;;
+        intel*32)   REPO_ARCH=x86_32;;
+        x86_32)     REPO_ARCH=x86_32;;
+        qemux86)    REPO_ARCH=x86;;
+        intel*)     REPO_ARCH=x86;;
+        x86)        REPO_ARCH=x86;;
+        *)          REPO_ARCH="${IMG_ARCH#qemu}";;
     esac
 
     if [ -z "$IMG_TYPE" ]; then
@@ -146,17 +161,25 @@ parse_command_line () {
         IMG_BASE="image-unknown"
     fi
 
-    REPO_BRANCH=runtime/$REPO_ORG.$BASE_TYPE/$REPO_ARCH/$IMG_VERSION
-    VERSION_BRANCH=version/$IMG_TYPE/$REPO_ARCH/$IMG_VERSION
+    BRANCH_BASE="runtime/$REPO_ORG.$BASE_TYPE/$REPO_ARCH"
 
-    if [ -n "$IMG_BUILDID" ]; then
-        BUILD_BRANCH=build/$IMG_TYPE/$REPO_ARCH/$IMG_BUILDID
-    else
-        BUILD_BRANCH=""
+    if [ -n "$IMG_VERSION" ]; then
+        IMAGE_BRANCH="$BRANCH_BASE/image/$IMG_VERSION"
+        BASE_BRANCH="$IMAGE_BRANCH"
     fi
 
-    if [ -n "$ROLLING_BRANCH" ]; then
-        ROLLING_BRANCH="runtime/$REPO_ORG.$BASE_TYPE/$REPO_ARCH/$ROLLING_BRANCH"
+    if [ -n "$DISTRO_VERSION" ]; then
+        DISTRO_BRANCH="$BRANCH_BASE/distro/$DISTRO_VERSION"
+        if [ -z "$BASE_BRANCH" ]; then
+            BASE_BRANCH="$DISTRO_BRANCH"
+        fi
+    fi
+
+    if [ -n "$ROLLING_VERSION" ]; then
+        ROLLING_BRANCH="$BRANCH_BASE/$ROLLING_VERSION"
+        if [ -z "$BASE_BRANCH" ]; then
+            BASE_BRANCH="$ROLLING_BRANCH"
+        fi
     fi
 
     if [ -z "$IMG_SYSROOT" ]; then
@@ -202,6 +225,13 @@ sysroot_cleanup () {
 # Initialize flatpak/OSTree repository, if necessary.
 repo_init () {
     if [ ! -d $REPO_PATH ]; then
+        case "$actions" in
+            *populate*) ;;
+            *) echo "error: no repo ($REPO_PATH) to export"
+               exit 1
+               ;;
+        esac
+
         echo "* Creating ${REPO_MODE:-archive-z2} repository $REPO_PATH..."
         mkdir -p $REPO_PATH
         ostree --repo=$REPO_PATH init --mode=${REPO_MODE:-archive-z2}
@@ -229,37 +259,39 @@ repo_populate () {
     echo "* Fixup permissions for OSTree..."
     find $SYSROOT -type f -exec chmod u+r {} \;
 
-    echo "* Populating repository with $IMG_TYPE image (branch $REPO_BRANCH)..."
+    echo "* Populating repository with $IMG_TYPE image (branch $BASE_BRANCH)..."
     ostree --repo=$REPO_PATH commit \
            --gpg-homedir=$GPG_HOME --gpg-sign=$GPG_ID \
            --owner-uid=0 --owner-gid=0 --no-xattrs \
            --subject "$IMG_TYPE $IMG_VERSION" \
            --body "Commit of $IMG_TYPE ($IMG_VERSION) into the repository." \
-           --branch=$REPO_BRANCH $SYSROOT
+           --branch=$BASE_BRANCH $SYSROOT
 
-    echo "* Creating version branch $VERSION_BRANCH..."
-    ostree --repo=$REPO_PATH commit --branch=$VERSION_BRANCH \
-           --gpg-homedir=$GPG_HOME --gpg-sign=$GPG_ID \
-           --subject "$IMG_TYPE $IMG_VERSION" \
-           --body "Commit of $IMG_TYPE ($IMG_VERSION) into the repository." \
-           --tree=ref=$REPO_BRANCH
-
-    if [ -n "$BUILD_BRANCH" ]; then
-        echo "* Creating build branch $BUILD_BRANCH..."
-        ostree --repo=$REPO_PATH commit --branch=$BUILD_BRANCH \
+    if [ -n "$IMAGE_BRANCH" -a "$IMAGE_BRANCH" != "$BASE_BRANCH" ]; then
+        echo "* Creating image branch $IMAGE_BRANCH..."
+        ostree --repo=$REPO_PATH commit --branch=$IMAGE_BRANCH \
                --gpg-homedir=$GPG_HOME --gpg-sign=$GPG_ID \
                --subject "$IMG_TYPE $IMG_VERSION" \
                --body "Commit of $IMG_TYPE ($IMG_VERSION) into the repository." \
-               --tree=ref=$REPO_BRANCH
+               --tree=ref=$BASE_BRANCH
     fi
 
-    if [ -n "$ROLLING_BRANCH" ];then
+    if [ -n "$DISTRO_BRANCH" -a "$DISTRO_BRANCH" != "$BASE_BRANCH" ]; then
+        echo "* Creating image branch $DISTRO_BRANCH..."
+        ostree --repo=$REPO_PATH commit --branch=$DISTRO_BRANCH \
+               --gpg-homedir=$GPG_HOME --gpg-sign=$GPG_ID \
+               --subject "$IMG_TYPE $IMG_VERSION" \
+               --body "Commit of $IMG_TYPE ($IMG_VERSION) into the repository." \
+               --tree=ref=$BASE_BRANCH
+    fi
+
+    if [ -n "$ROLLING_BRANCH" -a "$ROLLING_BRANCH" != "$BASE_BRANCH" ]; then
         echo "* Creating rolling branch $ROLLING_BRANCH..."
         ostree --repo=$REPO_PATH commit --branch=$ROLLING_BRANCH \
                --gpg-homedir=$GPG_HOME --gpg-sign=$GPG_ID \
                --subject "$IMG_TYPE $IMG_VERSION" \
                --body "Commit of $IMG_TYPE ($IMG_VERSION) into the repository." \
-               --tree=ref=$REPO_BRANCH
+               --tree=ref=$BASE_BRANCH
     fi
 }
 
@@ -287,11 +319,13 @@ repo_export () {
 # Generate and HTTP configuration fragment for the exported repository.
 repo_apache_config () {
     local _repo_path
+    local _repo_alias
 
     cd $REPO_EXPORT && _repo_path=$(pwd) && cd -
+    _repo_alias="/flatpak/${IMG_BASE%-flatpak-*}/$IMG_TYPE/"
 
     echo "* Generating apache2 config fragment for $REPO_EXPORT..."
-    (echo "Alias \"/flatpak/$IMG_BASE/$IMG_TYPE/\" \"$_repo_path/\""
+    (echo "Alias \"$_repo_alias\" \"$_repo_path/\""
      echo ""
      echo "<Directory $_repo_path>"
      echo "    Options Indexes FollowSymLinks"
@@ -322,29 +356,44 @@ GPG_ID=iot-refkit@key
 
 IMG_TMPDIR=/tmp
 IMG_ARCH=x86_64
-IMG_VERSION=0.0.1
-IMG_BUILDID=""
 IMG_SYSROOT=""
 IMG_TYPE=""
 IMG_LIBS=""
 
+actions=""
 parse_command_line $*
 
 echo "image root: $IMG_SYSROOT"
 echo "      type: $IMG_TYPE"
 echo "      arch: $IMG_ARCH"
 echo " repo arch: $REPO_ARCH"
+echo "  rolling version: ${ROLLING_VERSION:-none}"
+echo "   distro version: ${DISTRO_VERSION:-none}"
+echo "    image version: ${IMG_VERSION:-none}"
 echo "   version: $IMG_VERSION"
-echo "  build-id: $IMG_BUILDID"
-echo " qemu arch: $QEMU_ARCH"
 
 set -e
 
+
 repo_init
-sysroot_populate
-metadata_generate
-repo_populate
-repo_update_summary
-repo_export
-#generate_lib_list
-sysroot_cleanup
+
+if [ "${actions//populate/}" != "$actions" ]; then
+    sysroot_populate
+    metadata_generate
+    repo_populate
+    repo_update_summary
+    #generate_lib_list
+    sysroot_cleanup
+
+    actions="${actions//populate/}"
+fi
+
+if [ "${actions//export/}" != "$actions" ]; then
+    repo_export
+    actions="${actions//export/}"
+fi
+
+if [ -n "${actions// /}" ]; then
+    echo "error: unknown actions \"$actions\""
+    exit 1
+fi

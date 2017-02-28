@@ -5,7 +5,7 @@
 inherit distro_features_check
 REQUIRED_DISTRO_FEATURES_append = " usrmerge systemd pam"
 
-inherit flatpak-variables flatpak-keys
+inherit flatpak-variables
 
 # Declare our extra test cases. Also declare a few extra variables
 # we (might eventually) use in our test cases, so we want them
@@ -48,8 +48,8 @@ do_flatpakrepo () {
    fi
 
    case $IMAGE_BASENAME in
-       *-flatpak-runtime) FLATPAK_RUNTIME=runtime;;
-       *-flatpak-sdk)     FLATPAK_RUNTIME=sdk;;
+       *flatpak-runtime*) FLATPAK_RUNTIME=runtime;;
+       *flatpak-sdk*)     FLATPAK_RUNTIME=sdk;;
        *)                 FLATPAK_RUNTIME=none;;
    esac
 
@@ -68,6 +68,19 @@ do_flatpakrepo () {
 
    VERSION=$(cat $FLATPAK_ROOTFS/etc/version)
 
+   # Generate repository signing GPG keys, if we don't have them yet.
+   $FLATPAKBASE/scripts/gpg-keygen.sh \
+       --home $FLATPAK_GPGDIR \
+       --id $FLATPAK_GPGID \
+       --base "${FLATPAK_GPGID%%@*}"
+
+   # Save (signing) public key for the repo.
+   pubkey=${FLATPAK_GPGID%%@*}.pub
+   if [ ! -e ${IMGDEPLOYDIR}/$pubkey -a -e ${TOPDIR}/$pubkey ]; then
+       echo "Saving flatpak repository signing key $pubkey"
+       cp -v ${TOPDIR}/$pubkey ${IMGDEPLOYDIR}
+   fi
+
    # Generate/populate flatpak/OSTree repository
    $FLATPAKBASE/scripts/populate-repo.sh \
        --gpg-home $FLATPAK_GPGDIR \
@@ -83,12 +96,14 @@ do_flatpakrepo () {
        --distro-version $FLATPAK_VERSION \
        --rolling-version $FLATPAK_CURRENT \
        --tmp-dir $FLATPAK_TMPDIR
+
 }
 
 
 do_flatpakrepo[depends] += " \
     ostree-native:do_populate_sysroot \
     flatpak-native:do_populate_sysroot \
+    gnupg-native:do_populate_sysroot \
 "
 
 do_flatpakrepo[vardeps] += " \
@@ -140,8 +155,8 @@ do_flatpakexport () {
    fi
 
    case $IMAGE_BASENAME in
-       *-flatpak-runtime) FLATPAK_RUNTIME=runtime;;
-       *-flatpak-sdk)     FLATPAK_RUNTIME=sdk;;
+       *flatpak-runtime*) FLATPAK_RUNTIME=runtime;;
+       *flatpak-sdk*)     FLATPAK_RUNTIME=sdk;;
        *)                 FLATPAK_RUNTIME=none;;
    esac
 

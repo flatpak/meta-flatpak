@@ -340,7 +340,7 @@ can be done with the following command. If you're unsure about the correct
 URI and filesystem paths, take peak inside the generate http.conf file.
 
 ```
-mandark build $ flatpak remote-add refkit-image-minimal-flatpak-sdk --gpg-import=./refkit-image-minimal.pub http://127.0.0.1/flatpak/refkit-image-minimal-flatpak-sdk/sdk
+mandark build $ flatpak remote-add refkit-image-minimal-flatpak-sdk --gpg-import=./refkit-image-minimal.pub http://127.0.0.1/flatpak/refkit-image-minimal/sdk
 ```
 
 You should be able to see now your newly added remote repository when you
@@ -366,22 +366,22 @@ from that remote:
 ```
 mandark build $ flatpak remote-ls --runtime -d refkit-image-minimal-flatpak-sdk
 runtime/iot.refkit.BaseSdk/x86_64/20170210162508 a9b9124b15e3
-runtime/iot.refkit.BaseSdk/x86_64/latest-build   71eedc5de6e8
+runtime/iot.refkit.BaseSdk/x86_64/current 71eedc5de6e8
 ```
 
 You should see *iot.refkit.BaseSdk* show up among the listed runtimes.
 Let's pull in the SDK runtime to our machine with the following command.
 
 ```
-mandark build $ flatpak install refkit-image-minimal-flatpak-sdk iot.refkit.BaseSdk runtime/x86_64/latest-build
+mandark build $ flatpak install refkit-image-minimal-flatpak-sdk iot.refkit.BaseSdk runtime/x86_64/current
 Warning: Can't find dependencies: No flatpak cache in remote summary
-Updating: iot.refkit.BaseSdk/x86_64/latest-build from refkit-image-minimal-flatpak-sdk
+Updating: iot.refkit.BaseSdk/x86_64/current from refkit-image-minimal-flatpak-sdk
 
 110 metadata, 1515 content objects fetched; 12646 KiB transferred in 1 seconds  
 Now at 71eedc5de6e8.
 ```
 
-We chose to install the branch runtime/x86_64/latest-build which meta-flatpak
+We chose to install the branch runtime/x86_64/current which meta-flatpak
 always sets to point to the last version built. If you want to see all
 available versions, you can run
 
@@ -404,7 +404,7 @@ using and building.
 
 ```
 mandark test $ mkdir build.vim
-mandark test $ flatpak build-init build.vim org.vim.vim iot.refkit.BaseSdk iot.refkit.BasePlatform latest-build
+mandark test $ flatpak build-init build.vim org.vim.vim iot.refkit.BaseSdk iot.refkit.BasePlatform current
 ```
 
 If everything went successfully, we're now ready to go through the
@@ -470,8 +470,8 @@ filesystems=home
 
 [Application]
 name=org.vim.vim
-runtime=iot.refkit.BasePlatform/x86_64/latest-build
-sdk=iot.refkit.BaseSdk/x86_64/latest-build
+runtime=iot.refkit.BasePlatform/x86_64/current
+sdk=iot.refkit.BaseSdk/x86_64/current
 command=vim
 ```
 
@@ -749,7 +749,7 @@ Now let's flatpak-build the application 3 times:
 
 ```
 mandark app-builds $ for i in test1 test2 test3; do mkdir build.dummy-test.$i; done
-mandark app-builds $ for i in test1 test2 test3; do flatpak build-init build.dummy-test.$i org.$i.dummy iot.refkit.BaseSdk iot.refkit.BasePlatform latest-build; done
+mandark app-builds $ for i in test1 test2 test3; do flatpak build-init build.dummy-test.$i org.$i.dummy iot.refkit.BaseSdk iot.refkit.BasePlatform current; done
 mandark app-builds $ cd dummy-test
 mandark dummy-test $ for i in test1 test2 test3; do flatpak build ../build.dummy-test.$i ./configure --prefix=/app; flatpak build ../build.dummy-test.$i make; flatpak build ../build.dummy-test.$i make install; done
 /bin/sh: warning: setlocale: LC_ALL: cannot change locale (en_US.utf8)
@@ -775,24 +775,24 @@ mandark dummy-test $ for i in test1 test2 test3; do echo -e "X-Install=yes\nX-St
 mandark dummy-test $ for i in test1 test2 test3; do cat../build.dummy-test.$i/metadata; done
 [Application]
 name=org.test1.dummy
-runtime=iot.refkit.BasePlatform/x86_64/latest-build
-sdk=iot.refkit.BaseSdk/x86_64/latest-build
+runtime=iot.refkit.BasePlatform/x86_64/current
+sdk=iot.refkit.BaseSdk/x86_64/current
 command=dummy-test test1
 X-Install=yes
 X-Start=yes
 
 [Application]
 name=org.test2.dummy
-runtime=iot.refkit.BasePlatform/x86_64/latest-build
-sdk=iot.refkit.BaseSdk/x86_64/latest-build
+runtime=iot.refkit.BasePlatform/x86_64/current
+sdk=iot.refkit.BaseSdk/x86_64/current
 command=dummy-test test2
 X-Install=yes
 X-Start=yes
 
 [Application]
 name=org.test3.dummy
-runtime=iot.refkit.BasePlatform/x86_64/latest-build
-sdk=iot.refkit.BaseSdk/x86_64/latest-build
+runtime=iot.refkit.BasePlatform/x86_64/current
+sdk=iot.refkit.BaseSdk/x86_64/current
 command=dummy-test test3
 X-Install=yes
 X-Start=yes

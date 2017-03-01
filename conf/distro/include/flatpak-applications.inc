@@ -11,5 +11,4 @@ DISTRO_FEATURES_append = " pam usrmerge flatpak"
 PACKAGECONFIG_append_pn-dbus = " user-session"
 
 # This could/should be in our distro.conf... 2.4.x is GPLv3.
-PREFERRED_VERSION_gnupg = "${@bb.utils.contains('DISTRO_FEATURES', 'flatpak', \
-                                                '1.%', '%', d)}"
+PREFERRED_VERSION_gnupg = "1.%"

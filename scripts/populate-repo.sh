@@ -132,13 +132,13 @@ parse_command_line () {
     case $IMG_ARCH in
         qemux86-64) REPO_ARCH=x86_64;;
         intel*64)   REPO_ARCH=x86_64;;
-        x86_64)     REPO_ARCH=x86_64;;
+        *x86-64)    REPO_ARCH=x86_64;;
         qemux86-32) REPO_ARCH=x86_32;;
         intel*32)   REPO_ARCH=x86_32;;
-        x86_32)     REPO_ARCH=x86_32;;
+        *x86-32)    REPO_ARCH=x86_32;;
         qemux86)    REPO_ARCH=x86;;
         intel*)     REPO_ARCH=x86;;
-        x86)        REPO_ARCH=x86;;
+        *x86)       REPO_ARCH=x86;;
         *)          REPO_ARCH="${IMG_ARCH#qemu}";;
     esac
 

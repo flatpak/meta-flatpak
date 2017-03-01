@@ -148,6 +148,28 @@ gpg1_genkeys () {
     gpg --homedir=$GPG_HOME --import $GPG_BASE.pub
 }
 
+# Mark all keys trusted in our keyring.
+gpg1_trustkeys () {
+    local _trustdb=gpg.trustdb _fp
+
+    #
+    # This is a bit iffy... we misuse a supposedly private
+    # GPG API (the trust DB format).
+    #
+
+    echo "* Marking keys trusted in keyring..."
+
+    gpg --homedir=$GPG_HOME --export-ownertrust > $_trustdb
+
+    # Note: we might end up with duplicates but that's ok...
+    for _fp in $(gpg --homedir=$GPG_HOME --fingerprint | \
+                     grep " fingerprint = " | sed 's/^.* = //g;s/ //g'); do
+        echo $_fp:6: >> $_trustdb
+    done
+
+    gpg --homedir=$GPG_HOME --import-ownertrust < $_trustdb
+}
+
 # Import keys to GPG2 keyring.
 gpg2_import () {
     if [ "$GPG2_IMPORT" = "yes" ]; then
@@ -179,4 +201,5 @@ parse_command_line $*
 gpg1_chkkeys
 gpg1_mkconfig
 gpg1_genkeys
+gpg1_trustkeys
 gpg2_import

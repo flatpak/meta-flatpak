@@ -93,9 +93,10 @@ parse_command_line () {
     fi
 
     echo "* GPG key parameters:"
-    echo "    - ID: $GPG_ID"
-    echo "    - name: $GPG_NAME"
-    echo "    - files: $GPG_BASE.{cfg,pub,sec}"
+    echo "      home: ${GPG_HOME:-default gpg home}"
+    echo "    key ID: $GPG_ID"
+    echo "      name: $GPG_NAME"
+    echo "     files: $GPG_BASE.{cfg,pub,sec}"
 }
 
 # Check if the requested keys already exist.

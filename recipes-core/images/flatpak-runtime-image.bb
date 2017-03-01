@@ -1,12 +1,18 @@
+# Hmm... maybe we should just copy and adjust the content from
+# core-image-minimal instead...
+
 include ../meta/recipes-core/images/core-image-minimal.bb
 
-SUMMARY = "Flatpak runtime image for the target device."
+# Enable flatpak and SSH server distro features.
+IMAGE_FEATURES_append = " flatpak ssh-server-openssh"
 
-# Pull in openssh server.
-IMAGE_FEATURES_append = " ssh-server-openssh"
+# And pull in the flatpak bits.
+inherit flatpak-image
 
-# Pull in flatpak and its dependencies (+ terminfo and certificate files).
+# Well... not really core-image-minimal any more.
+SUMMARY = "A runtime image with flatpak support for a target device."
+
+# Make sure we have usable certificates, and terminfo.
 IMAGE_INSTALL_append = " \
-    systemd flatpak flatpak-utils flatpak-fake-runtime \
     ca-certificates ncurses-terminfo \
 "

@@ -14,8 +14,8 @@ FLATPAK_EXPORT ?= "${TOPDIR}/${IMAGE_BASENAME}.flatpak"
 # This is where our GPG keyring is generated/located and the default
 # key ID we use to sign (commits in) the repository.
 FLATPAK_GPGDIR ?= "${TOPDIR}/gpg"
-FLATPAK_GPGID  ?= "${@(d.getVar('IMAGE_BASENAME') or \
-                                                  '').split('-flatpak')[0]}@key"
+FLATPAK_GPGID  ?= "${@(d.getVar('DISTRO') or \
+                         'unknown').replace(' ', '_') + '-signing@key'}"
 
 # By default we publish two 'version' branches in our flatpak repositories:
 # One is a rolling release, the 'current' version. The other is derived from

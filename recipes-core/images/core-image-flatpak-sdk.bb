@@ -1,4 +1,4 @@
-include flatpak-runtime-image.bb
+include core-image-flatpak-runtime.bb
 
 SUMMARY = "Flatpak SDK image for the target- and binary compatible devices."
 

@@ -11,7 +11,7 @@ SRC_URI = " \
   git://git@github.com/klihub/flatpak-image-runtime.git;protocol=http;branch=master \
 "
 
-SRCREV = "636135c687d403ff57089a11d4f1718e9b256ba4"
+SRCREV = "94e4b53500ef5767bb00455e6be81235eea7dc65"
 
 DEPENDS = "systemd"
 
@@ -32,7 +32,7 @@ SYSTEMD_SERVICE_${PN} = " \
 
 EXTRA_OECONF += " \
             --with-systemdunitdir=${systemd_unitdir} \
-            --with-org=refkit \
+            --with-org="iot.${DISTRO}" \
             --with-arch=${arch} \
             --with-current=${FLATPAK_CURRENT} \
             --with-distro-version=${FLATPAK_VERSION} \

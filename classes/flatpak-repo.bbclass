@@ -32,6 +32,11 @@ do_flatpakrepo () {
    echo "  * IMAGE_BASENAME: $IMAGE_BASENAME"
    echo "  * IMAGE_NAME:     ${@d.getVar('IMAGE_NAME')}"
 
+   # Bail out if this looks like an initramfs image.
+   case $IMAGE_BASENAME in
+       *initramfs*) return 0;;
+   esac
+
    # Bail out early if flatpak is not enabled for this image.
    if [ "${FLATPAK_IMAGE_PATTERN%%:*}" == "glob" ]; then
        case $IMAGE_BASENAME in
@@ -48,9 +53,9 @@ do_flatpakrepo () {
    fi
 
    case $IMAGE_BASENAME in
-       *flatpak-runtime*) FLATPAK_RUNTIME=runtime;;
        *flatpak-sdk*)     FLATPAK_RUNTIME=sdk;;
-       *)                 FLATPAK_RUNTIME=none;;
+       *flatpak-runtime*) FLATPAK_RUNTIME=runtime;;
+       *)                 FLATPAK_RUNTIME=runtime;;
    esac
 
    FLATPAKBASE="${@d.getVar('FLATPAKBASE')}"
@@ -139,6 +144,11 @@ do_flatpakexport () {
    echo " * IMAGE_BASENAME: $IMAGE_BASENAME"
    echo " * IMAGE_NAME:     ${@d.getVar('IMAGE_NAME')}"
 
+   # Bail out if this looks like an initramfs image.
+   case $IMAGE_BASENAME in
+       *initramfs*) return 0;;
+   esac
+
    # Bail out early if flatpak is not enabled for this image.
    if [ "${FLATPAK_IMAGE_PATTERN%%:*}" == "glob" ]; then
        case $IMAGE_BASENAME in
@@ -155,9 +165,9 @@ do_flatpakexport () {
    fi
 
    case $IMAGE_BASENAME in
-       *flatpak-runtime*) FLATPAK_RUNTIME=runtime;;
        *flatpak-sdk*)     FLATPAK_RUNTIME=sdk;;
-       *)                 FLATPAK_RUNTIME=none;;
+       *flatpak-runtime*) FLATPAK_RUNTIME=runtime;;
+       *)                 FLATPAK_RUNTIME=runtime;;
    esac
 
    FLATPAKBASE="${@d.getVar('FLATPAKBASE')}"

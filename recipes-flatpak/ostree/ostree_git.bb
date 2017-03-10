@@ -38,7 +38,13 @@ AUTO_LIBNAME_PKGS = ""
 PACKAGECONFIG ??= ""
 
 EXTRA_OECONF_class-target += "--disable-man"
-EXTRA_OECONF_class-native += "--disable-man --with-builtin-grub2-mkconfig"
+EXTRA_OECONF_class-native += " \
+    --disable-man \
+    --with-builtin-grub2-mkconfig \
+    --enable-wrpseudo-compat \
+    --disable-otmpfile \
+"
+
 
 # package content
 FILES_${PN} += "${libdir}/girepository-1.0 ${datadir}/gir-1.0"

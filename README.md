@@ -122,7 +122,7 @@ submodules.
 Clone the repository and let it pull in its submodules:
 
 ```
-git clone https://github.com/klihub/intel-iot-refkit.git
+git clone https://github.com/klihub/intel-iot-refkit.git -b intel-iot-refkit/flatpak
 git submodule init
 git submodule update --recursive
 ```
@@ -340,7 +340,7 @@ can be done with the following command. If you're unsure about the correct
 URI and filesystem paths, take peak inside the generate http.conf file.
 
 ```
-mandark build $ flatpak remote-add refkit-image-minimal-flatpak-sdk --gpg-import=./refkit-image-minimal.pub http://127.0.0.1/flatpak/refkit-image-minimal/sdk
+mandark build $ flatpak remote-add refkit-image-minimal-flatpak-sdk --gpg-import=./refkit-signing.pub http://127.0.0.1/flatpak/refkit-image-minimal/sdk
 ```
 
 You should be able to see now your newly added remote repository when you
@@ -559,7 +559,7 @@ If this works, copy the public key matching the private key you used to
 sign our vim flatpak repository.
 
 ```
-mandark build $ scp refkit-image-minimal.pub root@192.168.7.2:
+mandark build $ scp refkit-signing.pub root@192.168.7.2:
 ```
 
 Let the runtime image know about our repository:
@@ -571,7 +571,7 @@ Last login: Fri Feb 10 17:32:37 2017
 *** This is a development image! ***
 *** Do not use in production.    ***
 ************************************
-root@qemux86-64:~# flatpak remote-add test --gpg-import=refkit-image-minimal.pub
+root@qemux86-64:~# flatpak remote-add test --gpg-import=refkit-signing.pub
 http://192.168.7.1/apps/vim.flatpak
 root@qemux86-64:~# flatpak remote-ls -d test
 app/org.vim.vim/x86_64/master f15cb7341253
@@ -687,7 +687,7 @@ for flatpak-session. Let's now add key and URL files for these remotes. For
 simplicity, we'll reuse the key we generated for our SDK image repo earlier:
 
 ```
-mandark build $ for i in 1 2 3; do cp refkit-image-minimal.pub conf/test$i.key; done
+mandark build $ for i in 1 2 3; do cp refkit-signing.pub conf/test$i.key; done
 
 mandark build $ cat conf/test1.url
 http://192.168.7.1/apps/test1

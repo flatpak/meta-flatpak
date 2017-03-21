@@ -5,7 +5,7 @@ diffstat@core
 ed@core
 gcc-sanitizers@core
 glib-networking@core
-gnupg@core
+gnupg@gplv2
 gpgme@core
 intltool@core
 json-glib@core

@@ -5,4 +5,4 @@ GPGME_BACKENDS ?= "gnupg"
 
 RDEPENDS_${PN} += "${GPGME_BACKENDS}"
 
-BBCLASSEXTEND = "native"
+BBCLASSEXTEND = "native nativesdk"

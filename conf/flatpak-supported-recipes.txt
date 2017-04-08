@@ -7,3 +7,5 @@ flatpak-utils@flatpak
 flatpak@flatpak
 fuse@flatpak
 ostree@flatpak
+efivar@openembedded-layer
+efibootmgr@openembedded-layer

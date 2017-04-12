@@ -7,12 +7,11 @@ LIC_FILES_CHKSUM = "file://COPYING;md5=5f30f0716dfdd0d91eb439ebec522ec2"
 SRC_URI = " \
     gitsm://git@github.com/ostreedev/ostree;protocol=https \
     file://0001-autogen.sh-fall-back-to-no-gtkdocize-if-it-is-there-.patch \
-    file://0001-libostree-fix-missing-macros-when-compiling-without-.patch \
 "
 
-SRCREV = "6517a8a27a1386e7cb5482e7cb2919fe92721ccf"
+SRCREV = "e02e90020663b8629e7d3d0ef8801d3af4ee1dd4"
 
-PV = "2017.1+git${SRCPV}"
+PV = "2017.3+git${SRCPV}"
 S = "${WORKDIR}/git"
 
 inherit autotools pkgconfig systemd gobject-introspection
@@ -38,16 +37,21 @@ AUTO_LIBNAME_PKGS = ""
 PACKAGECONFIG ??= ""
 
 EXTRA_OECONF_class-target += "--disable-man"
-EXTRA_OECONF_class-native += "--disable-man --with-builtin-grub2-mkconfig"
+EXTRA_OECONF_class-native += " \
+    --disable-man \
+    --with-builtin-grub2-mkconfig \
+    --enable-wrpseudo-compat \
+    --disable-otmpfile \
+"
 
 # package content
 FILES_${PN} += "${libdir}/girepository-1.0 ${datadir}/gir-1.0"
 SYSTEMD_SERVICE_${PN} = "ostree-prepare-root.service ostree-remount.service"
 
 do_configure_prepend() {
-    pushd ${S}
+    cd ${S}
     NOCONFIGURE=1 ./autogen.sh
-    popd
+    cd -
 }
 
 BBCLASSEXTEND = "native"

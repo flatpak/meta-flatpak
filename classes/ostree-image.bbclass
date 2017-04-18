@@ -48,6 +48,25 @@ BBCLASSEXTEND = "imagevariant:ostree"
 # Inherit (variables for our) ostree configuration
 inherit ostree-config
 
+# Check if we have an unchanged image and an already existing repo for it.
+image_repo () {
+    DEPLOY_DIR_IMAGE="${@d.getVar('DEPLOY_DIR_IMAGE')}"
+    IMAGE_NAME="${@d.getVar('IMAGE_NAME')}"
+    IMAGE_BASENAME="${@d.getVar('IMAGE_BASENAME')}"
+    IMAGE_ROOTFS="${@d.getVar('IMAGE_ROOTFS')}"
+    MACHINE="${@d.getVar('MACHINE')}"
+    ROOTFS_VERSION="$(cat $IMAGE_ROOTFS/etc/version)"
+
+    OSTREE_REPO="${@d.getVar('OSTREE_REPO')}"
+    IMAGE_REPO="$DEPLOY_DIR_IMAGE/$IMAGE_BASENAME-$MACHINE-$VERSION.ostree"
+
+    if [ -d $IMAGE_REPO ]; then
+        echo $IMAGE_REPO
+    else
+        echo $OSTREE_REPO
+    fi
+}
+
 # Take a pristine rootfs as input, shuffle its layout around to make it
 # OSTree-compatible, commit the rootfs into a per-build bare-user OSTree
 # repository, and finally produce an OSTree-enabled rootfs by cloning
@@ -98,6 +117,14 @@ fakeroot do_ostree_prepare_rootfs () {
     if [ ! -e ${IMGDEPLOYDIR}/$pubkey -a -e ${TOPDIR}/$pubkey ]; then
         echo "Saving OSTree repository signing key $pubkey"
         cp -v ${TOPDIR}/$pubkey ${IMGDEPLOYDIR}
+    fi
+
+    IMAGE_REPO=$(image_repo)
+
+    if [ "$IMAGE_REPO" != "$OSTREE_REPO" ]; then
+        echo "Symlinking to existing image repo $IMAGE_REPO..."
+        ln -s $IMAGE_REPO $OSTREE_REPO
+        return 0
     fi
 
     $OSTREEBASE/scripts/mk-ostree.sh -v -v \
@@ -165,10 +192,6 @@ fakeroot do_ostree_publish_rootfs () {
         echo "OSTree: OSTREE_EXPORT repository not set, not publishing."
         return 0
     fi
-
-    REAL_VERSION=$(cat $IMAGE_ROOTFS/etc/version)
-    OSTREE_REPO="${OSTREE_REPO%-[0123456789]*.ostree}-$REAL_VERSION.ostree"
-    echo "OSTREE_REPO=$OSTREE_REPO"
 
     $OSTREEBASE/scripts/mk-ostree.sh -v -v \
         --distro $DISTRO \

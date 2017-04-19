@@ -41,7 +41,7 @@ FEATURE_PACKAGES_ostree = " \
 # ostree variant: an image that can update itself using OSTree.
 IMAGE_VARIANT[ostree] = "ostree"
 
-BBCLASSEXTEND = "imagevariant:ostree"
+BBCLASSEXTEND += "imagevariant:ostree"
 
 ###########################################################################
 

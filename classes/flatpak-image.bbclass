@@ -33,4 +33,4 @@ IMAGE_VARIANT[flatpak-runtime] = "flatpak"
 # 'flatpak-sdk' variant (SDK image for a development host)
 IMAGE_VARIANT[flatpak-sdk] = "flatpak tools-develop tools-debug dev-pkgs"
 
-BBCLASSEXTEND = "imagevariant:flatpak-runtime imagevariant:flatpak-sdk"
+BBCLASSEXTEND += "imagevariant:flatpak-runtime imagevariant:flatpak-sdk"

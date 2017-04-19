@@ -12,3 +12,6 @@ PACKAGECONFIG_append_pn-dbus = " user-session"
 
 # This could/should be in our distro.conf... 2.4.x is GPLv3.
 PREFERRED_VERSION_gnupg = "1.%"
+
+# Disable gobject-introspection-data generation.
+DISTRO_FEATURES_BACKFILL_CONSIDERED = "gobject-introspection-data"

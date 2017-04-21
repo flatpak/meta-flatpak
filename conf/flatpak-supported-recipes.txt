@@ -9,3 +9,4 @@ flatpak-utils@flatpak
 flatpak@flatpak
 fuse@flatpak
 ostree@flatpak
+refkit-ostree@flatpak

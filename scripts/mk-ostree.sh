@@ -315,17 +315,19 @@ copy_sysroot () {
     chmod a+rx $OSTREE_SYSROOT
 }
 
-# Extract kernel, initramfs from UEFI app and copy it in place.
+# Copy and checksum kernel, initramfs, and the UEFI app in place for OSTree.
 copy_kernel () {
-    local _chksum _kernel _initrd
+    local _chksum _kernel _initrd _uefiapp
 
-    msg "Copying UEFI combo apps into OSTree sysroot..."
-
+    msg "Copying and checksumming UEFI combo app(s) into OSTree sysroot..."
     mkdir -p $OSTREE_SYSROOT/usr/lib/ostree-boot
-    cp $PRISTINE_SYSROOT/boot/EFI/BOOT/$UEFIAPP \
-        $OSTREE_SYSROOT/usr/lib/ostree-boot/uefi-combo-ext.efi
-    cp $PRISTINE_SYSROOT/boot/EFI_internal_storage/BOOT/$UEFIAPP \
-        $OSTREE_SYSROOT/usr/lib/ostree-boot/uefi-combo-int.efi
+    _uefiapp=$OSTREE_SYSROOT/usr/lib/ostree-boot/$UEFIAPP
+    cp $PRISTINE_SYSROOT/boot/EFI/BOOT/$UEFIAPP $_uefiapp.ext
+    cp $PRISTINE_SYSROOT/boot/EFI_internal_storage/BOOT/$UEFIAPP $_uefiapp.int
+    _chksum=$(/usr/bin/sha256sum $_uefiapp.ext | cut -d ' ' -f 1)
+    mv $_uefiapp.ext $_uefiapp.ext-$_chksum
+    _chksum=$(/usr/bin/sha256sum $_uefiapp.int | cut -d ' ' -f 1)
+    mv $_uefiapp.int $_uefiapp.int-$_chksum
 
     msg "Extracting and checksumming kernel, initramfs for ostree..."
     _kernel=$OSTREE_SYSROOT/usr/lib/ostree-boot/vmlinuz

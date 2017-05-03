@@ -272,8 +272,8 @@ files in *tmp-glibc/deploy/images/qemux86-64*, all of which should be named
 after the image you built, hence in our case
 *refkit-image-minimal-flatpak-runtime*.
 
-You should also have a few similarly named flatpak-related files directly
-under *build*, your current working directory. These should include:
+You should also have a few new files under *build*, your current working
+directory. These should include:
 
   * a flatpak (OSTree) repository containing your image (.flatpak)
   * an Apache2 configuration file for exporting your repository (.http.conf)
@@ -290,8 +290,7 @@ bitbake refkit-image-minimal-flatpak-sdk
 ```
 
 You should get a similar bunch of corresponding image- and flatpak-related
-files in *tmp-glibc/deploy/images/qemux86-64* and directly in *build* all
-starting with *refkit-image-minimal-flatpak-sdk*.
+files in *tmp-glibc/deploy/images/qemux86-64* and directly in *build*.
 
 
 # Testing
@@ -331,7 +330,7 @@ need to drop this in place and restart apache. For my distro of choice
 this can be accomplished with the following commands:
 
 ```
-mandark build $ sudo cp ./refkit-image-minimal-flatpak-sdk.flatpak.http.conf /etc/httpd/conf.d
+mandark build $ sudo cp ./refkit-image-minimal.flatpak.http.conf /etc/httpd/conf.d
 mandark build $ sudo systemctl restart httpd
 ```
 
@@ -340,7 +339,7 @@ can be done with the following command. If you're unsure about the correct
 URI and filesystem paths, take peak inside the generate http.conf file.
 
 ```
-mandark build $ flatpak remote-add refkit-image-minimal-flatpak-sdk --gpg-import=./refkit-signing.pub http://127.0.0.1/flatpak/refkit-image-minimal/sdk
+mandark build $ flatpak remote-add refkit-image-minimal --gpg-import=./refkit-signing.pub http://127.0.0.1/flatpak/refkit-image-minimal
 ```
 
 You should be able to see now your newly added remote repository when you
@@ -349,7 +348,7 @@ list the available remotes on your machine:
 ```
 mandark build $ flatpak remote-list
 gnome                           
-refkit-image-minimal-flatpak-sdk
+refkit-image-minimal
 refkit-runtime                  
 refkit-runtime-minimal          
 com.spotify.Client-1-origin     
@@ -359,31 +358,38 @@ com.spotify.Client-4-origin
 com.spotify.Client-origin       
 ```
 
-You should see *refkit-image-minimal-flatpak-sdk* show up in the list.
+You should see *refkit-image-minimal* show up in the list.
 Additionally, you should see our SDK if you list the runtimes available
 from that remote:
 
 ```
-mandark build $ flatpak remote-ls --runtime -d refkit-image-minimal-flatpak-sdk
+mandark build $ flatpak remote-ls --runtime -d refkit-image-minimal
 runtime/iot.refkit.BaseSdk/x86_64/20170210162508 a9b9124b15e3
 runtime/iot.refkit.BaseSdk/x86_64/current 71eedc5de6e8
 ```
 
 You should see *iot.refkit.BaseSdk* show up among the listed runtimes.
 Let's pull in the SDK runtime to our machine with the following command.
+Recent versions of flatpak seem to require *both* the base platform and SDK
+runtimes for building flatpaks, so we'll install both.
 
 ```
-mandark build $ flatpak install refkit-image-minimal-flatpak-sdk iot.refkit.BaseSdk runtime/x86_64/current
+mandark build $ flatpak install refkit-image-minimal iot.refkit.BaseSdk runtime/x86_64/current
 Warning: Can't find dependencies: No flatpak cache in remote summary
-Updating: iot.refkit.BaseSdk/x86_64/current from refkit-image-minimal-flatpak-sdk
+Updating: iot.refkit.BaseSdk/x86_64/current from refkit-image-minimal
 
-110 metadata, 1515 content objects fetched; 12646 KiB transferred in 1 seconds  
+110 metadata, 1515 content objects fetched; 12646 KiB transferred in 1 seconds
 Now at 71eedc5de6e8.
+mandark build $ flatpak install refkit-image-minimal iot.refkit.BasePlatform runtime/x86_64/current
+Warning: Can't find dependencies: No flatpak cache in remote summary
+Updating: iot.refkit.BasePlatform/x86_64/current from refkit-image-minimal
+
+55 metadata, 1110 content objects fetched; 11484 KiB transferred in 1 seconds
+Now at ac5edc8936e8.
 ```
 
 We chose to install the branch runtime/x86_64/current which meta-flatpak
-always sets to point to the last version built. If you want to see all
-available versions, you can run
+always sets to point to the last version built.
 
 If everything went ok this far, we should be now ready to compile some
 test application for our target device using the flatpak runtime SDK.

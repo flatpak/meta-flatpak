@@ -5,6 +5,7 @@ FLATPAK_ROOTFS  = "${IMAGE_ROOTFS}"
 FLATPAK_ARCH    = "${MACHINE}"
 FLATPAK_REPO    = "${IMGDEPLOYDIR}/${IMAGE_BASENAME}-${BUILD_ID}.flatpak"
 FLATPAK_DISTRO  = "${DISTRO}"
+FLATPAK_ORG    ?= "iot.${FLATPAK_DISTRO}"
 
 # This is where we export our builds (matching FLATPAK_IMAGE_PATTERN) in
 # archive-z2 format. This repository can be exposed over HTTP for clients.

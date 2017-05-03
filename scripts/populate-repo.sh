@@ -322,7 +322,7 @@ repo_apache_config () {
     local _repo_alias
 
     cd $REPO_EXPORT && _repo_path=$(pwd) && cd -
-    _repo_alias="/flatpak/${IMG_BASE%-flatpak-*}/$IMG_TYPE/"
+    _repo_alias="/flatpak/${IMG_BASE%-flatpak-*}/"
 
     echo "* Generating apache2 config fragment for $REPO_EXPORT..."
     (echo "Alias \"$_repo_alias\" \"$_repo_path/\""

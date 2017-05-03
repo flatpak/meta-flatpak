@@ -62,6 +62,7 @@ do_flatpakrepo () {
    FLATPAK_GPGID="${@d.getVar('FLATPAK_GPGID')}"
    FLATPAK_REPO="${@d.getVar('FLATPAK_REPO')}"
    FLATPAK_DISTRO="${@d.getVar('FLATPAK_DISTRO')}"
+   FLATPAK_ORG="${@d.getVar('FLATPAK_ORG')}"
    FLATPAK_RUNTIME_IMAGE="${@d.getVar('FLATPAK_RUNTIME_IMAGE')}"
    FLATPAK_CURRENT="${@d.getVar('FLATPAK_CURRENT')}"
    FLATPAK_VERSION="${@d.getVar('FLATPAK_VERSION')}"
@@ -87,7 +88,7 @@ do_flatpakrepo () {
        --gpg-id $FLATPAK_GPGID \
        --repo-path $FLATPAK_REPO \
        --repo-mode bare-user \
-       --repo-org "iot.$FLATPAK_DISTRO" \
+       --repo-org $FLATPAK_ORG \
        --image-dir $FLATPAK_ROOTFS \
        --image-base $IMAGE_BASENAME \
        --image-type $FLATPAK_RUNTIME \

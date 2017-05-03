@@ -10,7 +10,8 @@ FLATPAK_ORG    ?= "iot.${FLATPAK_DISTRO}"
 # This is where we export our builds (matching FLATPAK_IMAGE_PATTERN) in
 # archive-z2 format. This repository can be exposed over HTTP for clients.
 # By default it goes under the top build directory.
-FLATPAK_EXPORT ?= "${TOPDIR}/${IMAGE_BASENAME}.flatpak"
+FLATPAK_IMAGE_BASE  = "${@d.getVar('IMAGE_BASENAME').split('-flatpak')[0]}"
+FLATPAK_EXPORT     ?= "${TOPDIR}/${FLATPAK_IMAGE_BASE}.flatpak"
 
 # This is where our GPG keyring is generated/located and the default
 # key ID we use to sign (commits in) the repository.

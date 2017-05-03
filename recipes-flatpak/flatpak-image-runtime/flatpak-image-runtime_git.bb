@@ -32,7 +32,7 @@ SYSTEMD_SERVICE_${PN} = " \
 
 EXTRA_OECONF += " \
             --with-systemdunitdir=${systemd_unitdir} \
-            --with-org=refkit \
+            --with-org=${FLATPAK_ORG} \
             --with-arch=${arch} \
             --with-current=${FLATPAK_CURRENT} \
             --with-distro-version=${FLATPAK_VERSION} \

@@ -30,17 +30,20 @@ FLATPAK_VERSION ?= "${@(d.getVar('DISTRO_VERSION') or \
 FLATPAK_BUILD    = "${BUILD_ID}"
 
 
-# By default we trigger flatpak repository population/generation only
-# for images that we configured to be suitable for flatpak-building
-# applications. These images will have a basename matching the value
-# of FLATPAK_IMAGE_PATTERN.
+# By default we used to trigger flatpak repository population/generation
+# only for images that we configured to be suitable for flatpak-building
+# applications. However, with recent flatpak releases one needs to have
+# both the flatpak base and SDK runtimes installed for flatpak-building
+# applications. Hence we now trigger repository population for all flatpak
+# enabled images. These images will have a basename matching the default
+# value of FLATPAK_IMAGE_PATTERN.
 #
 # You can override this to generate flatpak repositories also for
 # other images by overriding this variable. You can use either a
 # a regexp suitable for grep or a shell globbing pattern that will
 # match your image name. For globbing patterns, the value should be
 # prefixed with 'glob:'.
-FLATPAK_IMAGE_PATTERN ?= 'glob:*-flatpak-sdk'
+FLATPAK_IMAGE_PATTERN ?= 'glob:*-flatpak-*'
 
 # You can pre-declare flatpak repositories/remotes for flatpak-enabled
 # images. Devices running such an image will monitor the remotes for

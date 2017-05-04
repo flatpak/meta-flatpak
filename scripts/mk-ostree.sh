@@ -90,8 +90,8 @@ detect_architecture () {
     fi
 
      _bin=''
-     if [ -e $PRISTINE_SYSROOT/boot/EFI/BOOT/boot*.efi ]; then
-        for _i in $PRISTINE_SYSROOT/boot/EFI/BOOT/boot*.efi; do
+     if [ -e $UEFI_DIR/EFI/BOOT/boot*.efi ]; then
+        for _i in $UEFI_DIR/EFI/BOOT/boot*.efi; do
             _bin=$_i
             break
         done
@@ -158,6 +158,7 @@ parse_cmdline () {
                     ;;
                 --src|-s|--source|--sysroot|--pristine-sysroot)
                     PRISTINE_SYSROOT="$2"
+                    UEFI_DIR="$PRISTINE_SYSROOT/boot"
                     shift 2
                     ;;
                 --dst|-d|--destination|--ostree-sysroot)
@@ -294,6 +295,7 @@ parse_cmdline () {
     msg "MACHINE: $MACHINE"
     msg "ARCH: $ARCH"
     msg "PRISTINE_SYSROOT: $PRISTINE_SYSROOT"
+    msg "UEFI_DIR: $UEFI_DIR"
     msg "OSTREE_SYSROOT: $OSTREE_SYSROOT"
     msg "SYSROOT_REPO: $SYSROOT_REPO"
     msg "EXPORT_REPO: $EXPORT_REPO"
@@ -322,8 +324,8 @@ copy_kernel () {
     msg "Copying and checksumming UEFI combo app(s) into OSTree sysroot..."
     mkdir -p $OSTREE_SYSROOT/usr/lib/ostree-boot
     _uefiapp=$OSTREE_SYSROOT/usr/lib/ostree-boot/$UEFIAPP
-    cp $PRISTINE_SYSROOT/boot/EFI/BOOT/$UEFIAPP $_uefiapp.ext
-    cp $PRISTINE_SYSROOT/boot/EFI_internal_storage/BOOT/$UEFIAPP $_uefiapp.int
+    cp $UEFI_DIR/EFI/BOOT/$UEFIAPP $_uefiapp.ext
+    cp $UEFI_DIR/EFI_internal_storage/BOOT/$UEFIAPP $_uefiapp.int
     _chksum=$(/usr/bin/sha256sum $_uefiapp.ext | cut -d ' ' -f 1)
     mv $_uefiapp.ext $_uefiapp.ext-$_chksum
     _chksum=$(/usr/bin/sha256sum $_uefiapp.int | cut -d ' ' -f 1)
@@ -333,16 +335,37 @@ copy_kernel () {
     _kernel=$OSTREE_SYSROOT/usr/lib/ostree-boot/vmlinuz
     _initrd=$OSTREE_SYSROOT/usr/lib/ostree-boot/initramfs
     objcopy --dump-section .linux=$_kernel --dump-section .initrd=$_initrd \
-        $PRISTINE_SYSROOT/boot/EFI/BOOT/$UEFIAPP
+        $UEFI_DIR/EFI/BOOT/$UEFIAPP
 
     _chksum=$(/usr/bin/sha256sum $_kernel | cut -d ' ' -f 1)
     mv $_kernel $_kernel-$_chksum
     mv $_initrd $_initrd-$_chksum
 }
 
+# Try to fix relative symlinks that point beyond /.
+fix_symlinks () {
+    local _cwd=$PWD
+
+    cd ${1:-usr/etc}
+    for _l in $(find . -type l); do
+        _t=$(readlink $_l)
+        case $_t in
+            ../../*) ;;
+            ../*)    ln -sf ../$_t $_l;;
+            *)       ;;
+        esac
+    done
+    cd $_cwd
+}
+
 # Mangle sysroot into an OSTree-compatible layout.
 ostreeify_sysroot () {
     local _l _t _pwd
+
+    # Note that everything created/shuffled here will end up getting
+    # relocated under the ostree deployment directory for the image
+    # we're building. Everything that needs to get created relativein the
+    # to the final physical rootfs should be done in finalize_sysroot.
 
     msg "* Shuffling sysroot to OSTree-compatible layout..."
 
@@ -356,7 +379,7 @@ ostreeify_sysroot () {
     #     /sysroot/ostree: ostree repo and deployments ('checkouts')
     #     /ostree: symlinked to /sysroot/ostree for consistent access
     #
-    # Additionally the deployment model suggest setting up deployment
+    # Additionally the deployment model suggests setting up deployment
     # root symlinks for the following:
     #
     #     /home -> /var/home (further linked -> /sysroot/home)
@@ -380,25 +403,18 @@ ostreeify_sysroot () {
     mkdir -p sysroot
     ln -sf sysroot/ostree ostree
 
-    rm -fr boot var home
-    mkdir boot var home
+    rm -fr boot
+    mkdir boot
+
+    rm -fr var home
+    mkdir var home
 
     rm -fr mnt tmp
     ln -sf var/mnt mnt
     ln -sf sysroot/tmp tmp
 
     mv etc usr/etc
-
-    cd usr/etc
-    for _l in $(find . -type l); do
-        _t=$(readlink $_l)
-        case $_t in
-            ../../*) ;;
-            ../*)    ln -sf ../$_t $_l;;
-            *)       ;;
-        esac
-    done
-    cd ../..
+    fix_symlinks usr/etc
 
     cd $_pwd
 }
@@ -421,7 +437,7 @@ prepare_sysroot () {
     ostreeify_sysroot
 }
 
-# Finalize OSTree sysroot by checking it out from the repository.
+# Replicate the ostree repository into the sysroot and make a checkout/deploy.
 checkout_sysroot () {
     msg "Checking out OSTree sysroot from primary repository..."
 
@@ -432,23 +448,24 @@ checkout_sysroot () {
     ostree admin --sysroot=$OSTREE_SYSROOT init-fs $OSTREE_SYSROOT
     ostree admin --sysroot=$OSTREE_SYSROOT os-init $DISTRO
 
-    info "Replicating primary OSTree repository..."
+    info "Replicating primary OSTree repository into OSTree sysroot..."
     ostree --repo=$OSTREE_SYSROOT/ostree/repo pull-local \
         --remote=$DISTRO $SYSROOT_REPO $OSTREE_BRANCH
 
     info "Deploying rootfs from OSTree sysroot repository..."
     ostree admin --sysroot=$OSTREE_SYSROOT deploy \
         --os=$DISTRO $DISTRO:$OSTREE_BRANCH
+}
 
-    info "Copying pristine sysroot /boot to OSTree sysroot..."
-    tar -C $PRISTINE_SYSROOT -cf - boot | \
-        tar -C $OSTREE_SYSROOT -xf -
+# Finalize the physical root directory after the ostree checkout.
+finalize_sysroot () {
+    info "Creating EFI mount point /boot/efi in OSTree sysroot..."
+    mkdir -p $OSTREE_SYSROOT/boot/efi
 
     info "Copying pristine sysroot /home to OSTree sysroot..."
     tar -C $PRISTINE_SYSROOT -cf - home | \
         tar -C $OSTREE_SYSROOT -xf -
 }
-
 
 # Populate primary OSTree repository (bare-user mode) with the given sysroot.
 populate_repo () {
@@ -498,6 +515,7 @@ if has_action 'prepare-sysroot'; then
     prepare_sysroot
     populate_repo
     checkout_sysroot
+    finalize_sysroot
 fi
 
 if has_action 'export-repo'; then

@@ -126,7 +126,6 @@ ostree_prepare_root () {
 
     mount --bind ../../var var
     mount --bind /rootfs/boot $_root/boot
-    mkdir -p $_root/home
     mount --bind /rootfs/home $_root/home
 
     cd - > /dev/null

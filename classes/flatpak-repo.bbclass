@@ -33,7 +33,7 @@ do_flatpakrepo () {
    echo "  * IMAGE_NAME:     ${@d.getVar('IMAGE_NAME')}"
 
    # Bail out early if flatpak is not enabled for this image.
-   if [ "${FLATPAK_IMAGE_PATTERN%%:*}" == "glob" ]; then
+   if [ "${FLATPAK_IMAGE_PATTERN%%:*}" = "glob" ]; then
        case $IMAGE_BASENAME in
            ${FLATPAK_IMAGE_PATTERN#glob:}) repo_enabled=yes;;
            *)                              repo_enabled="";;
@@ -141,7 +141,7 @@ do_flatpakexport () {
    echo " * IMAGE_NAME:     ${@d.getVar('IMAGE_NAME')}"
 
    # Bail out early if flatpak is not enabled for this image.
-   if [ "${FLATPAK_IMAGE_PATTERN%%:*}" == "glob" ]; then
+   if [ "${FLATPAK_IMAGE_PATTERN%%:*}" = "glob" ]; then
        case $IMAGE_BASENAME in
            ${FLATPAK_IMAGE_PATTERN#glob:}) repo_enabled=yes;;
            *)                              repo_enabled="";;

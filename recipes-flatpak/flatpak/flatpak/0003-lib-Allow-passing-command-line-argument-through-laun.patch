@@ -1,7 +1,7 @@
-From 72e07c5380fbac343508d0f23c50f17cde2a048e Mon Sep 17 00:00:00 2001
+From 559597e3687bd1cebb70ebcd55e674e0df9a9390 Mon Sep 17 00:00:00 2001
 From: Krisztian Litkey <krisztian.litkey@intel.com>
 Date: Fri, 4 Nov 2016 10:38:22 +0200
-Subject: [PATCH 1/1] lib: Allow passing command line argument through launch.
+Subject: [PATCH 3/3] lib: Allow passing command line argument through launch.
 
 Added a new function flatpak_installation_launch_with_args which is
 actually a copy of the original flatpak_installation_launch slightly
@@ -16,10 +16,10 @@ Signed-off-by: Krisztian Litkey <krisztian.litkey@intel.com>
  2 files changed, 57 insertions(+), 10 deletions(-)
 
 diff --git a/lib/flatpak-installation.c b/lib/flatpak-installation.c
-index 0dd11a2..fe74cf4 100644
+index 12803d7..370c854 100644
 --- a/lib/flatpak-installation.c
 +++ b/lib/flatpak-installation.c
-@@ -311,16 +311,18 @@ flatpak_installation_get_path (FlatpakInstallation *self)
+@@ -492,16 +492,18 @@ flatpak_installation_get_storage_type (FlatpakInstallation *self)
  }
  
  /**
@@ -40,7 +40,7 @@ index 0dd11a2..fe74cf4 100644
   *
   * You can use flatpak_installation_get_installed_ref() or
   * flatpak_installation_get_current_installed_app() to find out what builds
-@@ -329,13 +331,15 @@ flatpak_installation_get_path (FlatpakInstallation *self)
+@@ -510,13 +512,15 @@ flatpak_installation_get_storage_type (FlatpakInstallation *self)
   * Returns: %TRUE, unless an error occurred
   */
  gboolean
@@ -63,7 +63,7 @@ index 0dd11a2..fe74cf4 100644
  {
    g_autoptr(FlatpakDir) dir = flatpak_installation_get_dir (self);
    g_autofree char *app_ref = NULL;
-@@ -358,11 +362,45 @@ flatpak_installation_launch (FlatpakInstallation *self,
+@@ -539,11 +543,45 @@ flatpak_installation_launch (FlatpakInstallation *self,
                            NULL,
                            FLATPAK_RUN_FLAG_BACKGROUND,
                            NULL,
@@ -111,10 +111,10 @@ index 0dd11a2..fe74cf4 100644
  get_ref (FlatpakDir          *dir,
           const char          *full_ref,
 diff --git a/lib/flatpak-installation.h b/lib/flatpak-installation.h
-index 9f1e726..dacbfe1 100644
+index 089d510..c5d352b 100644
 --- a/lib/flatpak-installation.h
 +++ b/lib/flatpak-installation.h
-@@ -119,6 +119,15 @@ FLATPAK_EXTERN gboolean             flatpak_installation_launch (FlatpakInstalla
+@@ -148,6 +148,15 @@ FLATPAK_EXTERN gboolean             flatpak_installation_launch (FlatpakInstalla
                                                                   const char          *commit,
                                                                   GCancellable        *cancellable,
                                                                   GError             **error);

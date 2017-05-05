@@ -1,7 +1,7 @@
-From 57a30849f5b6b539eabff772f6379877e6970c7f Mon Sep 17 00:00:00 2001
+From 05c348dfbd55bc63db16e1518f4f904c4b049cdd Mon Sep 17 00:00:00 2001
 From: Krisztian Litkey <krisztian.litkey@intel.com>
 Date: Fri, 4 Nov 2016 10:38:50 +0200
-Subject: [PATCH 1/1] common: Allow command to include command line
+Subject: [PATCH 2/3] common: Allow command to include command line
  options/arguments.
 
 Allow command from the command line or from a metadata file to
@@ -10,22 +10,22 @@ add all the resulting arguments to the real argument array.
 
 Signed-off-by: Krisztian Litkey <krisztian.litkey@intel.com>
 ---
- common/flatpak-run.c | 7 ++++++-
- 1 file changed, 6 insertions(+), 1 deletion(-)
+ common/flatpak-run.c | 10 +++++++++-
+ 1 file changed, 9 insertions(+), 1 deletion(-)
 
 diff --git a/common/flatpak-run.c b/common/flatpak-run.c
-index c7b02be..c4de4da 100644
+index 0cef78a..03e98f9 100644
 --- a/common/flatpak-run.c
 +++ b/common/flatpak-run.c
-@@ -3093,6 +3093,7 @@ flatpak_run_app (const char     *app_ref,
-   g_autoptr(GPtrArray) session_bus_proxy_argv = NULL;
-   g_autoptr(GPtrArray) system_bus_proxy_argv = NULL;
+@@ -4498,6 +4498,7 @@ flatpak_run_app (const char     *app_ref,
+   g_autoptr(GPtrArray) real_argv_array = NULL;
+   g_auto(GStrv) envp = NULL;
    const char *command = "/bin/sh";
 +  gchar **argv, *arg;
    g_autoptr(GError) my_error = NULL;
    g_auto(GStrv) runtime_parts = NULL;
    int i;
-@@ -3266,7 +3267,11 @@ flatpak_run_app (const char     *app_ref,
+@@ -4687,7 +4688,14 @@ flatpak_run_app (const char     *app_ref,
                NULL);
    }
  
@@ -35,9 +35,12 @@ index c7b02be..c4de4da 100644
 +    g_ptr_array_add (real_argv_array, g_strdup (arg));
 +  g_strfreev(argv);
 +
-   for (i = 0; i < n_args; i++)
-     g_ptr_array_add (real_argv_array, g_strdup (args[i]));
- 
++ for (i = 0; i < n_args; i++)
++    g_ptr_array_add (real_argv_array, g_strdup (args[i]));
++
+   if (!add_rest_args (app_ref_parts[1], exports, (flags & FLATPAK_RUN_FLAG_FILE_FORWARDING) != 0,
+                       doc_mount_path,
+                       real_argv_array, args, n_args, error))
 -- 
 2.7.4
 

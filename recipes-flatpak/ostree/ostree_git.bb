@@ -9,7 +9,7 @@ SRC_URI = " \
     file://0001-autogen.sh-fall-back-to-no-gtkdocize-if-it-is-there-.patch \
 "
 
-SRCREV = "59897f2b8484e322a77f23cc0d532dbd3de6aac6"
+SRCREV = "f3cc0eb25a773d21fdbbb778f1756df5466ff7cf"
 
 PV = "2017.5+git${SRCPV}"
 S = "${WORKDIR}/git"

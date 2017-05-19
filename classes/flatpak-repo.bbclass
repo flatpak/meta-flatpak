@@ -25,12 +25,12 @@ IOTQA_EXTRA_BUILDDATA += " \
 #
 
 do_flatpakrepo () {
-   IMAGE_BASENAME="${@d.getVar('IMAGE_BASENAME')}"
-   FLATPAK_IMAGE_PATTERN="${@d.getVar('FLATPAK_IMAGE_PATTERN')}"
+   IMAGE_BASENAME="${@d.getVar('IMAGE_BASENAME', False)}"
+   FLATPAK_IMAGE_PATTERN="${@d.getVar('FLATPAK_IMAGE_PATTERN', False)}"
 
    echo "Flatpak repository population:"
    echo "  * IMAGE_BASENAME: $IMAGE_BASENAME"
-   echo "  * IMAGE_NAME:     ${@d.getVar('IMAGE_NAME')}"
+   echo "  * IMAGE_NAME:     ${@d.getVar('IMAGE_NAME', False)}"
 
    # Bail out if this looks like an initramfs image.
    case $IMAGE_BASENAME in
@@ -58,18 +58,18 @@ do_flatpakrepo () {
        *)                 FLATPAK_RUNTIME=runtime;;
    esac
 
-   FLATPAKBASE="${@d.getVar('FLATPAKBASE')}"
-   FLATPAK_TOPDIR="${@d.getVar('FLATPAK_TOPDIR')}"
-   FLATPAK_TMPDIR="${@d.getVar('FLATPAK_TMPDIR')}"
-   FLATPAK_ROOTFS="${@d.getVar('FLATPAK_ROOTFS')}"
-   FLATPAK_ARCH="${@d.getVar('FLATPAK_ARCH')}"
-   FLATPAK_GPGDIR="${@d.getVar('FLATPAK_GPGDIR')}"
-   FLATPAK_GPGID="${@d.getVar('FLATPAK_GPGID')}"
-   FLATPAK_REPO="${@d.getVar('FLATPAK_REPO')}"
-   FLATPAK_DISTRO="${@d.getVar('FLATPAK_DISTRO')}"
-   FLATPAK_RUNTIME_IMAGE="${@d.getVar('FLATPAK_RUNTIME_IMAGE')}"
-   FLATPAK_CURRENT="${@d.getVar('FLATPAK_CURRENT')}"
-   FLATPAK_VERSION="${@d.getVar('FLATPAK_VERSION')}"
+   FLATPAKBASE="${@d.getVar('FLATPAKBASE', False)}"
+   FLATPAK_TOPDIR="${@d.getVar('FLATPAK_TOPDIR', False)}"
+   FLATPAK_TMPDIR="${@d.getVar('FLATPAK_TMPDIR', False)}"
+   FLATPAK_ROOTFS="${@d.getVar('FLATPAK_ROOTFS', False)}"
+   FLATPAK_ARCH="${@d.getVar('FLATPAK_ARCH', False)}"
+   FLATPAK_GPGDIR="${@d.getVar('FLATPAK_GPGDIR', False)}"
+   FLATPAK_GPGID="${@d.getVar('FLATPAK_GPGID', False)}"
+   FLATPAK_REPO="${@d.getVar('FLATPAK_REPO', False)}"
+   FLATPAK_DISTRO="${@d.getVar('FLATPAK_DISTRO', False)}"
+   FLATPAK_RUNTIME_IMAGE="${@d.getVar('FLATPAK_RUNTIME_IMAGE', False)}"
+   FLATPAK_CURRENT="${@d.getVar('FLATPAK_CURRENT', False)}"
+   FLATPAK_VERSION="${@d.getVar('FLATPAK_VERSION', False)}"
 
    VERSION=$(cat $FLATPAK_ROOTFS/etc/version)
 
@@ -129,7 +129,7 @@ do_flatpakrepo[vardeps] += " \
 # exporting image to archive-z2 repository
 #
 do_flatpakexport () {
-   FLATPAK_EXPORT="${@d.getVar('FLATPAK_EXPORT')}"
+   FLATPAK_EXPORT="${@d.getVar('FLATPAK_EXPORT', False)}"
 
    # Bail out early if no export repository is defined.
    if [ -z "$FLATPAK_EXPORT" ]; then
@@ -137,12 +137,12 @@ do_flatpakexport () {
        return 0
    fi
 
-   IMAGE_BASENAME="${@d.getVar('IMAGE_BASENAME')}"
-   FLATPAK_IMAGE_PATTERN="${@d.getVar('FLATPAK_IMAGE_PATTERN')}"
+   IMAGE_BASENAME="${@d.getVar('IMAGE_BASENAME', False)}"
+   FLATPAK_IMAGE_PATTERN="${@d.getVar('FLATPAK_IMAGE_PATTERN', False)}"
 
    echo "Flatpak repository exporting:"
    echo " * IMAGE_BASENAME: $IMAGE_BASENAME"
-   echo " * IMAGE_NAME:     ${@d.getVar('IMAGE_NAME')}"
+   echo " * IMAGE_NAME:     ${@d.getVar('IMAGE_NAME', False)}"
 
    # Bail out if this looks like an initramfs image.
    case $IMAGE_BASENAME in
@@ -170,18 +170,18 @@ do_flatpakexport () {
        *)                 FLATPAK_RUNTIME=runtime;;
    esac
 
-   FLATPAKBASE="${@d.getVar('FLATPAKBASE')}"
-   FLATPAK_TOPDIR="${@d.getVar('FLATPAK_TOPDIR')}"
-   FLATPAK_TMPDIR="${@d.getVar('FLATPAK_TMPDIR')}"
-   FLATPAK_ROOTFS="${@d.getVar('FLATPAK_ROOTFS')}"
-   FLATPAK_ARCH="${@d.getVar('FLATPAK_ARCH')}"
-   FLATPAK_GPGDIR="${@d.getVar('FLATPAK_GPGDIR')}"
-   FLATPAK_GPGID="${@d.getVar('FLATPAK_GPGID')}"
-   FLATPAK_REPO="${@d.getVar('FLATPAK_REPO')}"
-   FLATPAK_DISTRO="${@d.getVar('FLATPAK_DISTRO')}"
-   FLATPAK_RUNTIME_IMAGE="${@d.getVar('FLATPAK_RUNTIME_IMAGE')}"
-   FLATPAK_CURRENT="${@d.getVar('FLATPAK_CURRENT')}"
-   FLATPAK_VERSION="${@d.getVar('FLATPAK_VERSION')}"
+   FLATPAKBASE="${@d.getVar('FLATPAKBASE', False)}"
+   FLATPAK_TOPDIR="${@d.getVar('FLATPAK_TOPDIR', False)}"
+   FLATPAK_TMPDIR="${@d.getVar('FLATPAK_TMPDIR', False)}"
+   FLATPAK_ROOTFS="${@d.getVar('FLATPAK_ROOTFS', False)}"
+   FLATPAK_ARCH="${@d.getVar('FLATPAK_ARCH', False)}"
+   FLATPAK_GPGDIR="${@d.getVar('FLATPAK_GPGDIR', False)}"
+   FLATPAK_GPGID="${@d.getVar('FLATPAK_GPGID', False)}"
+   FLATPAK_REPO="${@d.getVar('FLATPAK_REPO', False)}"
+   FLATPAK_DISTRO="${@d.getVar('FLATPAK_DISTRO', False)}"
+   FLATPAK_RUNTIME_IMAGE="${@d.getVar('FLATPAK_RUNTIME_IMAGE', False)}"
+   FLATPAK_CURRENT="${@d.getVar('FLATPAK_CURRENT', False)}"
+   FLATPAK_VERSION="${@d.getVar('FLATPAK_VERSION', False)}"
 
    VERSION=$(cat $FLATPAK_ROOTFS/etc/version)
 

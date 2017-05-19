@@ -39,10 +39,10 @@ EXTRA_OECONF += " \
 "
 
 do_configure_prepend () {
-    FLATPAK_ROOTFS="${@d.getVar('FLATPAK_ROOTFS')}"
-    FLATPAK_CURRENT="${@d.getVar('FLATPAK_CURRENT')}"
-    FLATPAK_ARCH="${@d.getVar('FLATPAK_ARCH')}"
-    FLATPAK_VERSION="${@d.getVar('FLATPAK_VERSION')}"
+    FLATPAK_ROOTFS="${@d.getVar('FLATPAK_ROOTFS', False)}"
+    FLATPAK_CURRENT="${@d.getVar('FLATPAK_CURRENT', False)}"
+    FLATPAK_ARCH="${@d.getVar('FLATPAK_ARCH', False)}"
+    FLATPAK_VERSION="${@d.getVar('FLATPAK_VERSION', False)}"
 
     case $FLATPAK_ARCH in
         intel*64) arch=x86_64;;

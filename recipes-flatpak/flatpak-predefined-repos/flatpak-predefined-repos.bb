@@ -21,7 +21,7 @@ inherit autotools flatpak-variables
 # Turn the space-separated repo name list into a comma-separated one and
 # pass it to configure.
 EXTRA_OECONF += " \
-    --with-repos=${@','.join(d.getVar('FLATPAK_APP_REPOS').split())} \
+    --with-repos=${@','.join(d.getVar('FLATPAK_APP_REPOS', False).split())} \
 "
 
 # We can't just blindly inherit useradd. It has a parse-time check and
@@ -32,12 +32,12 @@ EXTRA_OECONF += " \
 # Therefore, we inherit useradd conditionally only if the set of repos
 # is not empty to avoid a parse-time failure.
 #
-inherit ${@'useradd' if d.getVar('FLATPAK_APP_REPOS') else ''}
+inherit ${@'useradd' if d.getVar('FLATPAK_APP_REPOS', False) else ''}
 
 # Ask for the creation of the necessary repo users/groups (turn the
 # space-separated list into a semi-colon-separated one).
 USERADD_PACKAGES = "${PN}"
-USERADD_PARAM_${PN} = "${@';'.join(d.getVar('FLATPAK_APP_REPOS').split())}"
+USERADD_PARAM_${PN} = "${@';'.join(d.getVar('FLATPAK_APP_REPOS', False).split())}"
 
 
 FILES_${PN} = " \
@@ -47,8 +47,8 @@ FILES_${PN} = " \
 do_configure_prepend () {
     local _build _r
 
-    _build="${@d.getVar('TOPDIR')}"
-    FLATPAK_APP_REPOS="${@d.getVar('FLATPAK_APP_REPOS')}"
+    _build="${@d.getVar('TOPDIR', False)}"
+    FLATPAK_APP_REPOS="${@d.getVar('FLATPAK_APP_REPOS', False)}"
     if [ -z "$FLATPAK_APP_REPOS" ]; then
         return 0
     fi

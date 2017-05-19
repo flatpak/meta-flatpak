@@ -6,7 +6,7 @@ IMAGE_FEATURES[validitems] += " \
 FEATURE_PACKAGES_flatpak = " \
     packagegroup-flatpak \
     ${@'flatpak-predefined-repos' \
-         if d.getVar('FLATPAK_APP_REPOS') else ''} \
+         if d.getVar('FLATPAK_APP_REPOS', False) else ''} \
 "
 
 inherit flatpak-repo

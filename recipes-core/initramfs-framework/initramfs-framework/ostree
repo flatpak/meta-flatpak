@@ -1,23 +1,22 @@
 #!/bin/sh
 
+DISTRO='refkit'
+SCRIPT='/usr/bin/refkit-ostree'
+
 # We consider the ostree module always enabled if it is installed.
 ostree_enabled () {
-    return 0
-}
-
-# Check we're booting into an image which looks like an ostree-based one.
-ostree_check () {
     if [ -d /rootfs/ostree/deploy ]; then
         return 0
     else
-        info "ostree: doesn't look like an ostree-based image... nothing to do."
+        info "ostree: doesn't look like an ostree-based image... disabling."
         return 1
     fi
 }
 
+
 # Print a fatal error message, starting a shell if we're in development mode.
 ostree_fatal () {
-    if grep -q "imagetype=development"; then
+    if grep -q "imagetype=development" /proc/cmdline; then
         error "ostree: $*"
         /bin/sh
     else
@@ -35,173 +34,23 @@ ostree_debug () {
     debug "ostree: $*"
 }
 
-# Find the two most recent installed ostree deployments.
-ostree_discover_entries () {
-    OSTREE_ENTRY_CURR=""
-    OSTREE_ENTRY_PREV=""
-    _curr="0"
-    _prev="0"
-
-    for e in /rootfs/boot/loader/entries/ostree-*.conf; do
-        _v=$(grep '^version ' $e)
-        _v=${_v#version }
-
-        if [ $_v -gt $_curr ]; then
-            _prev=$_curr
-            _curr=$_v
-            OSTREE_ENTRY_PREV=$OSTREE_ENTRY_CURR
-            OSTREE_ENTRY_CURR=$e
-        elif [ $_v -gt $_prev ]; then
-            _prev=$_v
-            OSTREE_ENTRY_PREV=$e
+# Find our ostree helper/wrapper script in on of the deployments.
+ostree_discover_wrapper () {
+    for _e in /rootfs/ostree/deploy/$DISTRO/deploy/*.?; do
+        if [ -x $_e$SCRIPT ]; then
+            WRAPPER="$_e$SCRIPT"
+            break
         fi
     done
 
-    if [ -z "$OSTREE_ENTRY_CURR" ]; then
-        ostree_fatal "failed to discover any ostree bootloader entries"
-    fi
-
-    ostree_info "current entry: $OSTREE_ENTRY_CURR"
-    ostree_info "previous entry: ${OSTREE_ENTRY_PREV:-none}"
-
-    return 0
-}
-
-
-# Parse the most recent ostree bootloader entry for command line/root.
-ostree_parse_options () {
-    _e=$1
-
-    ostree_debug "parsing $_e for kernel commandline ostree options..."
-
-    _options=$(cat $_e | grep '^options ')
-    _options=${_options#options }
-    _root=""
-
-    for _opt in $_options; do
-        case $_opt in
-            ostree=*) _root=${_opt#ostree=};;
-            *) ;;
-        esac
-    done
-
-    ostree_info "active deployment: $_root"
-
-    if [ -z "$_root" ]; then
-        ostree_fatal "failed to determine deployment to boot into"
-    fi
-
-    if [ ! -d "/rootfs$_root" ]; then
-        ostree_fatal "deployment $_root does not exist"
-    fi
-
-    if [ ! -x /rootfs$_root/usr/bin/ostree ]; then
-        ostree_fatal "deployment $_root has no ostree binary"
-    fi
-
-    OSTREE_ROOT=$_root
-}
-
-# Make the given filesystem movable.
-ostree_make_movable () {
-    for _fs in $*; do
-        ostree_debug "making $_fs movable..."
-        mount --bind $_fs $_fs
-    done
-}
-
-# Fill in the missing details, stitching together the root filesystem.
-ostree_prepare_root () {
-    _root=$1
-
-    #
-    # We need to prepare the deployment root to be kosher for becoming
-    # the final root to be pivot-rooted into. This involves stitching
-    # its missing bits in place. Currently this is done as follows
-    #   - bind-mount the common /var into the deployment
-    #   - bind-mount the common /boot into the deployment
-    #   - bind-mount the common /home into the deployment
-
-    cd $_root
-
-    mount --bind ../../var var
-    mount --bind /rootfs/boot $_root/boot
-    mount --bind /rootfs/home $_root/home
-
-    cd - > /dev/null
-}
-
-# Shuffle the deployment around so that systemd ends up pivot-rooting into it.
-ostree_shuffle_root () {
-    _root=$1
-
-    # This code mimicks the last bits of ostree-prepare-root. It shuffles
-    # /sysroot and the chosen deployment root around so that /rootfs becomes
-    # $_root/sysroot and $_root becomes /rootfs. Then eventually after the
-    # final pivot-root we end up with
-    #
-    #     1) current $_root (the deployment) as /
-    #     2) current /rootfs as /sysroot
-    #
-    # The only tricky/difficult to follow bit here is that we have to do
-    # this with an extra step to avoid trying to move the eventual /sysroot
-    # (now /rootfs) under itself.
-
-    ostree_debug "shuffling /rootfs, /sysroot and $_root around..."
-
-    cd $_root
-
-    # make /rootfs $_root/sysroot and $_root /rootfs
-    mkdir /sysroot.tmp
-    mount --move $_root /sysroot.tmp
-    mount --move /rootfs sysroot
-    mount --move . /rootfs
-
-    cd - > /dev/null
+    [ -n "$WRAPPER" ] && return 0 || return 1
 }
 
 # Run the ostree image setup sequence.
 ostree_run () {
-    # Bail out gracefully if this is not look like an ostree-based image.
-    if ! ostree_check; then
-        return 0
+    if ! ostree_discover_wrapper; then
+        ostree_fatal "could not find $SCRIPT in any deployment..."
     fi
 
-    # Parse the boot loader entries, find the most recent deployment.
-    ostree_discover_entries
-
-    # Parse the most recent entry extracting the ostree deployment path.
-    ostree_parse_options $OSTREE_ENTRY_CURR
-
-    #
-    # In principle at this point we could fairly easily patch things
-    # up so that even the stock ostree-prepare-root could take over
-    # the preparation for pivot-rooting. Roughly like this:
-    #
-    #    # patch kernel command-line for ostree
-    #    cat /proc/cmdline tr -d '\n' > cmdline
-    #    echo " ostree=$OSTREE_ROOT" >> cmdline
-    #    mount -o ro --bind $(pwd)/cmdline /proc/cmdline
-    #    # make dynamic resolution from/for the deployment work
-    #    LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/rootfs$OSTREE_ROOT/usr/lib"
-    #    LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/rootfs$OSTREE_ROOT/usr/lib64"
-    #    export LD_LIBRARY_PATH
-    #    # let ostree-prepare-root take over
-    #    /rootfs$OSTREE_ROOT/usr/lib/ostree/ostree-prepare-root /sysroot
-    #
-    # We might eventually end up doing that. ATM however, this gives us
-    # extra leeway in case we happen to run into some nasty surprises.
-    # Besides, the things we/ostree-prepare-root need doing are pretty
-    # darn simple anyway and as a bonus this way we save around 10k of
-    # uncompressed initramfs real estate...
-    #
-
-    # Make the deployment root movable.
-    ostree_make_movable /rootfs$OSTREE_ROOT
-
-    # Prepare the deployment root for becoming the final root.
-    ostree_prepare_root /rootfs$OSTREE_ROOT
-
-    # Shuffle the filesystem around for final pivot-rooting.
-    ostree_shuffle_root /rootfs$OSTREE_ROOT
+    $WRAPPER initramfs-prepare-root
 }

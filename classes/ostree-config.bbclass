@@ -18,4 +18,6 @@ OSTREE_EXPORT ?= "${TOPDIR}/${IMAGE_BASENAME}.ostree"
 OSTREE_GPGDIR ?= "${TOPDIR}/gpg"
 OSTREE_GPGID  ?= "${@d.getVar('DISTRO').replace(' ', '_') + '-signing@key'}"
 
-
+# OSTree remote (HTTP URL) where updates will be published.
+OSTREE_REMOTE ?= "${@'http://updates.refkit.org/ostree/' + \
+                        d.getVar('IMAGE_BASENAME').split('-ostree')[0]}"

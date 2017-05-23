@@ -15,6 +15,7 @@ KEEP_TMP=''                                 # keep temporary artefacts
 OVERWRITE=''                                # overwrite existing artefacts
 TMPDIR=''                                   # temporary work directory
 COMMIT_SUBJECT=""                           # repo commit message
+REMOTE_URL=''                               # ostree remote HTTP URL
 
 # Print help on usage.
 print_usage () {
@@ -36,6 +37,7 @@ print_usage () {
     echo "  --subject <msg>       ostree commit/subject message"
     echo "  --gpg-home <dir>      GPG home directory for signing"
     echo "  --gpg-id <id>         GPG key ID to sign repository commit"
+    echo "  --remote <url>        OSTree update server remote URL"
     echo "  --verbose             increase logging verbosity"
     echo "  --keep-tmp            keep produced temporary artefacts"
     echo "  --overwrite           overwrite existing artefacts"
@@ -187,6 +189,10 @@ parse_cmdline () {
                     ;;
                 --gpg-id)
                     GPG_ID="$2"
+                    shift 2
+                    ;;
+                --remote)
+                    REMOTE_URL="$2"
                     shift 2
                     ;;
                 --verbose|-v)
@@ -455,6 +461,12 @@ checkout_sysroot () {
     info "Deploying rootfs from OSTree sysroot repository..."
     ostree admin --sysroot=$OSTREE_SYSROOT deploy \
         --os=$DISTRO $DISTRO:$OSTREE_BRANCH
+
+    if [ -n "$OSTREE_REMOTE" ]; then
+        info "Setting OSTree remote to $REMOTE_URL..."
+        ostree admin --sysroot=$OSTREE_SYSROOT set-origin \
+            $DISTRO $REMOTE_URL
+    fi
 }
 
 # Finalize the physical root directory after the ostree checkout.

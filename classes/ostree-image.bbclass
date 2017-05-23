@@ -84,6 +84,7 @@ fakeroot do_ostree_prepare_rootfs () {
     OSTREE_ARCH="${@d.getVar('OSTREE_ARCH')}"
     OSTREE_GPGDIR="${@d.getVar('OSTREE_GPGDIR')}"
     OSTREE_GPGID="${@d.getVar('OSTREE_GPGID')}"
+    OSTREE_REMOTE="${@d.getVar('OSTREE_REMOTE')}"
 
     echo "DISTRO=$DISTRO"
     echo "MACHINE=$MACHINE"
@@ -97,6 +98,7 @@ fakeroot do_ostree_prepare_rootfs () {
     echo "OSTREE_ARCH=$OSTREE_ARCH"
     echo "OSTREE_GPGDIR=$OSTREE_GPGDIR"
     echo "OSTREE_GPGID=$OSTREE_GPGID"
+    echo "OSTREE_REMOTE=${OSTREE_REMOTE:-none}"
 
     # bail out if this does not look like an -ostree image variant
     if ${@bb.utils.contains('IMAGE_FEATURES','ostree', 'true','false', d)}; then
@@ -127,6 +129,12 @@ fakeroot do_ostree_prepare_rootfs () {
         return 0
     fi
 
+    if [ -n "$OSTREE_REMOTE" ]; then
+        remote="--remote $OSTREE_REMOTE"
+    else
+        remote=""
+    fi
+
     $OSTREEBASE/scripts/mk-ostree.sh -v -v \
         --distro $DISTRO \
         --arch $OSTREE_ARCH \
@@ -138,6 +146,7 @@ fakeroot do_ostree_prepare_rootfs () {
         --tmpdir $TMPDIR \
         --gpg-home $OSTREE_GPGDIR \
         --gpg-id $OSTREE_GPGID \
+        $remote \
         --overwrite \
         prepare-sysroot export-repo
 }

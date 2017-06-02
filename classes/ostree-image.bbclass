@@ -148,7 +148,7 @@ fakeroot do_ostree_prepare_rootfs () {
         --gpg-id $OSTREE_GPGID \
         $remote \
         --overwrite \
-        prepare-sysroot export-repo
+        prepare-sysroot # export-repo
 }
 
 do_ostree_prepare_rootfs[depends] += " \

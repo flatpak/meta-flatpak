@@ -7,14 +7,17 @@ SRC_URI = " \
   git://git@github.com/klihub/refkit-ostree-upgrade.git;protocol=http;branch=master \
 "
 
-SRCREV = "a196e93ed90b65f21e496aa566d17b06484fcc45"
+SRCREV = "cd4887dae318e318169d6cf718d39989160082ad"
 
-inherit autotools systemd
+DEPENDS = "ostree"
+
+inherit autotools pkgconfig systemd
 
 S = "${WORKDIR}/git"
 
 FILES_${PN} = " \
     ${bindir}/refkit-ostree \
+    ${bindir}/refkit-ostree-update \
     ${systemd_unitdir}/system/* \
 "
 

@@ -21,5 +21,4 @@ do_configure_prepend () {
 RDEPENDS_${PN}_remove = "gpgv"
 RDEPENDS_${PN}_class-target = "gpgv"
 
-BBCLASSEXTEND = "native"
-
+BBCLASSEXTEND = "native nativesdk"

@@ -4,5 +4,3 @@ FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
 GPGME_BACKENDS ?= "gnupg"
 
 RDEPENDS_${PN} += "${GPGME_BACKENDS}"
-
-BBCLASSEXTEND = "native"

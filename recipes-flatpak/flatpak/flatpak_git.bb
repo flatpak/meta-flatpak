@@ -18,12 +18,13 @@ DEPENDS = " \
     glib-2.0 json-glib libsoup-2.4 libarchive elfutils fuse \
     ostree libassuan libgpg-error systemd \
     gpgme appstream-glib python3-pyparsing-native bison-native \
+    libseccomp polkit \
 "
 
 DEPENDS_class-native = " \
     glib-2.0-native libsoup-2.4-native json-glib-native libarchive-native \
     elfutils-native fuse-native ostree-native \
-    libassuan-native libgpg-error-native bubblewrap-native \
+    libassuan-native libgpg-error-native \
     gpgme-native appstream-glib-native python3-pyparsing-native bison-native \
 "
 
@@ -38,7 +39,7 @@ PACKAGECONFIG ?= ""
 
 PACKAGECONFIG[seccomp] = "--enable-seccomp,--disable-seccomp,seccomp"
 PACKAGECONFIG[x11] = "--enable-xauth,--disable-xauth,x11"
-PACKAGECONFIG[system-helper] = "--enable-system-helper,--disable-system-helper,poklit"
+PACKAGECONFIG[system-helper] = "--enable-system-helper,--disable-system-helper,polkit"
 
 EXTRA_OECONF += " \
     --disable-docbook-docs \
@@ -63,7 +64,7 @@ PACKAGES =+ " \
 "
 
 FILES_${PN} += " \
-    ${libdir}/systemd/system \
+    ${systemd_unitdir} \
     ${libdir}/systemd/user/*.service \
     ${libdir}/systemd/user/dbus.service.d/*.conf \
     ${libdir}/systemd/system-environment-generators/60-flatpak-system-only \

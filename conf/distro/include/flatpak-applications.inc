@@ -11,7 +11,7 @@ DISTRO_FEATURES_append = " pam usrmerge systemd flatpak"
 PACKAGECONFIG_append_pn-dbus = " user-session"
 
 # This could/should be in our distro.conf... 2.4.x is GPLv3.
-PREFERRED_VERSION_gnupg = "1.%"
+PREFERRED_VERSION_gnupg = "2.%"
 
 # Disable sysvinit completely.
 VIRTUAL-RUNTIME_init_manager = "systemd"

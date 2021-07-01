@@ -6,6 +6,9 @@ FLATPAK_ARCH    = "${MACHINE}"
 FLATPAK_REPO    = "${IMGDEPLOYDIR}/${IMAGE_BASENAME}-${BUILD_ID}.flatpak"
 FLATPAK_DISTRO  = "${DISTRO}"
 
+# Select whether to use GPG to sign generated flatpaks or not.
+FLATPAK_GPG_SIGN ?= "1"
+
 # This is where we export our builds (matching FLATPAK_IMAGE_PATTERN) in
 # archive-z2 format. This repository can be exposed over HTTP for clients.
 # By default it goes under the top build directory.

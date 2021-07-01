@@ -17,6 +17,7 @@ print_usage () {
     echo "  --repo-mode <type>    repository mode [archive-z2]"
     echo "  --repo-org <org>      how to name runtime and branches [iot.refkit]"
     echo "  --repo-export <exp>   export the image also to archive-z2 <exp>"
+    echo "  --skip-gpg            don't bother signing the images"
     echo "  --gpg-home <dir>      GPG home directory for keyring"
     echo "  --gpg-id <id>         GPG key id to use for signing"
     echo "  --image-dir <dir>     image directory to populate repository with"
@@ -50,6 +51,11 @@ parse_command_line () {
             --repo-export)
                 REPO_EXPORT=$2
                 shift 2
+                ;;
+
+            --skip-gpg)
+                SKIP_GPG="1"
+                shift 1
                 ;;
 
             --gpg-home|--gpg-homedir|-G)
@@ -282,8 +288,12 @@ repo_populate () {
 # Update repository summary.
 repo_update_summary () {
     echo "* Updating repository summary..."
-    ostree --repo=$REPO_PATH summary -u \
-      --gpg-homedir=$GPG_HOME --gpg-sign=$GPG_ID
+    if [ "${SKIP_GPG}" == "0" ]; then
+        ostree --repo=$REPO_PATH summary -u \
+          --gpg-homedir=$GPG_HOME --gpg-sign=$GPG_ID
+    else
+        ostree --repo=$REPO_PATH summary -u
+    fi
 }
 
 # Mirror the branch we created to our export repository.
@@ -291,9 +301,12 @@ repo_export () {
     if [ -n "$REPO_EXPORT" ]; then
         echo "* Mirroring $REPO_PATH to export repository $REPO_EXPORT..."
         ostree --repo=$REPO_EXPORT pull-local $REPO_PATH
-        ostree --repo=$REPO_EXPORT summary -u \
-          --gpg-homedir=$GPG_HOME --gpg-sign=$GPG_ID
-
+        if [ "${SKIP_GPG}" == "0" ]; then
+            ostree --repo=$REPO_EXPORT summary -u \
+              --gpg-homedir=$GPG_HOME --gpg-sign=$GPG_ID
+        else
+            ostree --repo=$REPO_EXPORT summary -u
+        fi
         repo_apache_config
     else
         echo "* No export repo given, not exporting (in archive-z2 format)..."
@@ -335,6 +348,7 @@ REPO_ORG=iot.refkit
 REPO_MODE=""
 REPO_EXPORT=""
 
+SKIP_GPG="0"
 GPG_HOME=.gpg.flatpak
 GPG_ID=iot-refkit@key
 

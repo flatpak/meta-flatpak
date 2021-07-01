@@ -74,33 +74,51 @@ do_flatpakrepo () {
    VERSION=$(cat $FLATPAK_ROOTFS/etc/version)
 
     # Generate repository signing GPG keys, if we don't have them yet.
-    $FLATPAKBASE/scripts/gpg-keygen.sh \
-        --home $FLATPAK_GPGDIR \
-        --id $FLATPAK_GPGID \
-        --base "${FLATPAK_GPGID%%@*}"
+    FLATPAK_GPG_SIGN="${@d.getVar('FLATPAK_GPG_SIGN')}"
+    if [ "${FLATPAK_GPG_SIGN}" == "1" ]; then
+        $FLATPAKBASE/scripts/gpg-keygen.sh \
+            --home $FLATPAK_GPGDIR \
+            --id $FLATPAK_GPGID \
+            --base "${FLATPAK_GPGID%%@*}"
 
-   # Save (signing) public key for the repo.
-   pubkey=${FLATPAK_GPGID%%@*}.pub
-   if [ ! -e ${IMGDEPLOYDIR}/$pubkey -a -e ${TOPDIR}/$pubkey ]; then
-       echo "Saving flatpak repository signing key $pubkey"
-       cp -v ${TOPDIR}/$pubkey ${IMGDEPLOYDIR}
-   fi
+       # Save (signing) public key for the repo.
+       pubkey=${FLATPAK_GPGID%%@*}.pub
+       if [ ! -e ${IMGDEPLOYDIR}/$pubkey -a -e ${TOPDIR}/$pubkey ]; then
+           echo "Saving flatpak repository signing key $pubkey"
+           cp -v ${TOPDIR}/$pubkey ${IMGDEPLOYDIR}
+       fi
 
-   # Generate/populate flatpak/OSTree repository
-   $FLATPAKBASE/scripts/populate-repo.sh \
-       --gpg-home $FLATPAK_GPGDIR \
-       --gpg-id $FLATPAK_GPGID \
-       --repo-path $FLATPAK_REPO \
-       --repo-mode bare-user \
-       --repo-org "iot.$FLATPAK_DISTRO" \
-       --image-dir $FLATPAK_ROOTFS \
-       --image-base $IMAGE_BASENAME \
-       --image-type $FLATPAK_RUNTIME \
-       --image-arch $FLATPAK_ARCH \
-       --image-version $VERSION \
-       --distro-version $FLATPAK_VERSION \
-       --rolling-version $FLATPAK_CURRENT \
-       --tmp-dir $FLATPAK_TMPDIR
+       # Generate/populate flatpak/OSTree repository
+       $FLATPAKBASE/scripts/populate-repo.sh \
+           --gpg-home $FLATPAK_GPGDIR \
+           --gpg-id $FLATPAK_GPGID \
+           --repo-path $FLATPAK_REPO \
+           --repo-mode bare-user \
+           --repo-org "iot.$FLATPAK_DISTRO" \
+           --image-dir $FLATPAK_ROOTFS \
+           --image-base $IMAGE_BASENAME \
+           --image-type $FLATPAK_RUNTIME \
+           --image-arch $FLATPAK_ARCH \
+           --image-version $VERSION \
+           --distro-version $FLATPAK_VERSION \
+           --rolling-version $FLATPAK_CURRENT \
+           --tmp-dir $FLATPAK_TMPDIR
+    else
+       # Generate/populate flatpak/OSTree repository
+       $FLATPAKBASE/scripts/populate-repo.sh \
+           --skip-gpg \
+           --repo-path $FLATPAK_REPO \
+           --repo-mode bare-user \
+           --repo-org "iot.$FLATPAK_DISTRO" \
+           --image-dir $FLATPAK_ROOTFS \
+           --image-base $IMAGE_BASENAME \
+           --image-type $FLATPAK_RUNTIME \
+           --image-arch $FLATPAK_ARCH \
+           --image-version $VERSION \
+           --distro-version $FLATPAK_VERSION \
+           --rolling-version $FLATPAK_CURRENT \
+           --tmp-dir $FLATPAK_TMPDIR
+    fi
 
 }
 
@@ -186,21 +204,39 @@ do_flatpakexport () {
    VERSION=$(cat $FLATPAK_ROOTFS/etc/version)
 
    # Export to archive-z2 flatpak/OSTree repository
-   $FLATPAKBASE/scripts/populate-repo.sh \
-       --gpg-home $FLATPAK_GPGDIR \
-       --gpg-id $FLATPAK_GPGID \
-       --repo-path $FLATPAK_REPO \
-       --repo-export $FLATPAK_EXPORT \
-       --repo-org "iot.$FLATPAK_DISTRO" \
-       --image-dir $FLATPAK_ROOTFS \
-       --image-base $IMAGE_BASENAME \
-       --image-type $FLATPAK_RUNTIME \
-       --image-arch $FLATPAK_ARCH \
-       --image-version $VERSION \
-       --distro-version $FLATPAK_VERSION \
-       --rolling-version $FLATPAK_CURRENT \
-       --tmp-dir $FLATPAK_TMPDIR \
-       export
+   FLATPAK_GPG_SIGN="${@d.getVar('FLATPAK_GPG_SIGN')}"
+   if [ "${FLATPAK_GPG_SIGN}" == "1" ]; then
+       $FLATPAKBASE/scripts/populate-repo.sh \
+           --gpg-home $FLATPAK_GPGDIR \
+           --gpg-id $FLATPAK_GPGID \
+           --repo-path $FLATPAK_REPO \
+           --repo-export $FLATPAK_EXPORT \
+           --repo-org "iot.$FLATPAK_DISTRO" \
+           --image-dir $FLATPAK_ROOTFS \
+           --image-base $IMAGE_BASENAME \
+           --image-type $FLATPAK_RUNTIME \
+           --image-arch $FLATPAK_ARCH \
+           --image-version $VERSION \
+           --distro-version $FLATPAK_VERSION \
+           --rolling-version $FLATPAK_CURRENT \
+           --tmp-dir $FLATPAK_TMPDIR \
+           export
+   else
+       $FLATPAKBASE/scripts/populate-repo.sh \
+           --skip-gpg \
+           --repo-path $FLATPAK_REPO \
+           --repo-export $FLATPAK_EXPORT \
+           --repo-org "iot.$FLATPAK_DISTRO" \
+           --image-dir $FLATPAK_ROOTFS \
+           --image-base $IMAGE_BASENAME \
+           --image-type $FLATPAK_RUNTIME \
+           --image-arch $FLATPAK_ARCH \
+           --image-version $VERSION \
+           --distro-version $FLATPAK_VERSION \
+           --rolling-version $FLATPAK_CURRENT \
+           --tmp-dir $FLATPAK_TMPDIR \
+           export
+   fi
 }
 
 

@@ -164,12 +164,12 @@ parse_command_line () {
     BRANCH_BASE="runtime/$REPO_ORG.$BASE_TYPE/$REPO_ARCH"
 
     if [ -n "$IMG_VERSION" ]; then
-        IMAGE_BRANCH="$BRANCH_BASE/image/$IMG_VERSION"
+        IMAGE_BRANCH="$BRANCH_BASE/image-$IMG_VERSION"
         BASE_BRANCH="$IMAGE_BRANCH"
     fi
 
     if [ -n "$DISTRO_VERSION" ]; then
-        DISTRO_BRANCH="$BRANCH_BASE/distro/$DISTRO_VERSION"
+        DISTRO_BRANCH="$BRANCH_BASE/distro-$DISTRO_VERSION"
         if [ -z "$BASE_BRANCH" ]; then
             BASE_BRANCH="$DISTRO_BRANCH"
         fi
@@ -258,40 +258,24 @@ repo_populate () {
     # OSTree can't handle files with no read permission
     echo "* Fixup permissions for OSTree..."
     find $SYSROOT -type f -exec chmod u+r {} \;
+    flatpak build-export --files=files "$REPO_PATH" "$SYSROOT" stable
 
     echo "* Populating repository with $IMG_TYPE image (branch $BASE_BRANCH)..."
-    ostree --repo=$REPO_PATH commit \
-           --gpg-homedir=$GPG_HOME --gpg-sign=$GPG_ID \
-           --owner-uid=0 --owner-gid=0 --no-xattrs \
-           --subject "$IMG_TYPE $IMG_VERSION" \
-           --body "Commit of $IMG_TYPE ($IMG_VERSION) into the repository." \
-           --branch=$BASE_BRANCH $SYSROOT
+    flatpak build-commit-from --src-ref="${BRANCH_BASE}/stable" $REPO_PATH $BASE_BRANCH
 
     if [ -n "$IMAGE_BRANCH" -a "$IMAGE_BRANCH" != "$BASE_BRANCH" ]; then
         echo "* Creating image branch $IMAGE_BRANCH..."
-        ostree --repo=$REPO_PATH commit --branch=$IMAGE_BRANCH \
-               --gpg-homedir=$GPG_HOME --gpg-sign=$GPG_ID \
-               --subject "$IMG_TYPE $IMG_VERSION" \
-               --body "Commit of $IMG_TYPE ($IMG_VERSION) into the repository." \
-               --tree=ref=$BASE_BRANCH
+        flatpak build-commit-from --src-ref="${BRANCH_BASE}/stable" $REPO_PATH $IMAGE_BRANCH
     fi
 
     if [ -n "$DISTRO_BRANCH" -a "$DISTRO_BRANCH" != "$BASE_BRANCH" ]; then
         echo "* Creating image branch $DISTRO_BRANCH..."
-        ostree --repo=$REPO_PATH commit --branch=$DISTRO_BRANCH \
-               --gpg-homedir=$GPG_HOME --gpg-sign=$GPG_ID \
-               --subject "$IMG_TYPE $IMG_VERSION" \
-               --body "Commit of $IMG_TYPE ($IMG_VERSION) into the repository." \
-               --tree=ref=$BASE_BRANCH
+        flatpak build-commit-from --src-ref="${BRANCH_BASE}/stable" $REPO_PATH $DISTRO_BRANCH
     fi
 
     if [ -n "$ROLLING_BRANCH" -a "$ROLLING_BRANCH" != "$BASE_BRANCH" ]; then
         echo "* Creating rolling branch $ROLLING_BRANCH..."
-        ostree --repo=$REPO_PATH commit --branch=$ROLLING_BRANCH \
-               --gpg-homedir=$GPG_HOME --gpg-sign=$GPG_ID \
-               --subject "$IMG_TYPE $IMG_VERSION" \
-               --body "Commit of $IMG_TYPE ($IMG_VERSION) into the repository." \
-               --tree=ref=$BASE_BRANCH
+        flatpak build-commit-from --src-ref="${BRANCH_BASE}/stable" $REPO_PATH $ROLLING_BRANCH
     fi
 }
 
@@ -299,7 +283,7 @@ repo_populate () {
 repo_update_summary () {
     echo "* Updating repository summary..."
     ostree --repo=$REPO_PATH summary -u \
-           --gpg-homedir=$GPG_HOME --gpg-sign=$GPG_ID
+      --gpg-homedir=$GPG_HOME --gpg-sign=$GPG_ID
 }
 
 # Mirror the branch we created to our export repository.
@@ -308,7 +292,7 @@ repo_export () {
         echo "* Mirroring $REPO_PATH to export repository $REPO_EXPORT..."
         ostree --repo=$REPO_EXPORT pull-local $REPO_PATH
         ostree --repo=$REPO_EXPORT summary -u \
-           --gpg-homedir=$GPG_HOME --gpg-sign=$GPG_ID
+          --gpg-homedir=$GPG_HOME --gpg-sign=$GPG_ID
 
         repo_apache_config
     else

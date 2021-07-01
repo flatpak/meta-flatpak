@@ -2,7 +2,7 @@
 # distro features cannot be reliably forced, not even by a layer. Use
 # the next best thing.
 
-inherit distro_features_check
+inherit features_check
 REQUIRED_DISTRO_FEATURES_append = " usrmerge systemd pam"
 
 inherit flatpak-variables
@@ -66,18 +66,18 @@ do_flatpakrepo () {
    FLATPAK_GPGDIR="${@d.getVar('FLATPAK_GPGDIR')}"
    FLATPAK_GPGID="${@d.getVar('FLATPAK_GPGID')}"
    FLATPAK_REPO="${@d.getVar('FLATPAK_REPO')}"
-   FLATPAK_DISTRO="${@d.getVar('FLATPAK_DISTRO')}"
+   FLATPAK_DISTRO="${@d.getVar('FLATPAK_DISTRO').replace('-', '_')}"
    FLATPAK_RUNTIME_IMAGE="${@d.getVar('FLATPAK_RUNTIME_IMAGE')}"
    FLATPAK_CURRENT="${@d.getVar('FLATPAK_CURRENT')}"
    FLATPAK_VERSION="${@d.getVar('FLATPAK_VERSION')}"
 
    VERSION=$(cat $FLATPAK_ROOTFS/etc/version)
 
-   # Generate repository signing GPG keys, if we don't have them yet.
-   $FLATPAKBASE/scripts/gpg-keygen.sh \
-       --home $FLATPAK_GPGDIR \
-       --id $FLATPAK_GPGID \
-       --base "${FLATPAK_GPGID%%@*}"
+    # Generate repository signing GPG keys, if we don't have them yet.
+    $FLATPAKBASE/scripts/gpg-keygen.sh \
+        --home $FLATPAK_GPGDIR \
+        --id $FLATPAK_GPGID \
+        --base "${FLATPAK_GPGID%%@*}"
 
    # Save (signing) public key for the repo.
    pubkey=${FLATPAK_GPGID%%@*}.pub
@@ -178,7 +178,7 @@ do_flatpakexport () {
    FLATPAK_GPGDIR="${@d.getVar('FLATPAK_GPGDIR')}"
    FLATPAK_GPGID="${@d.getVar('FLATPAK_GPGID')}"
    FLATPAK_REPO="${@d.getVar('FLATPAK_REPO')}"
-   FLATPAK_DISTRO="${@d.getVar('FLATPAK_DISTRO')}"
+   FLATPAK_DISTRO="${@d.getVar('FLATPAK_DISTRO').replace('-', '_')}"
    FLATPAK_RUNTIME_IMAGE="${@d.getVar('FLATPAK_RUNTIME_IMAGE')}"
    FLATPAK_CURRENT="${@d.getVar('FLATPAK_CURRENT')}"
    FLATPAK_VERSION="${@d.getVar('FLATPAK_VERSION')}"

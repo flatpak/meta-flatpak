@@ -38,7 +38,7 @@ do_flatpakrepo () {
    esac
 
    # Bail out early if flatpak is not enabled for this image.
-   if [ "${FLATPAK_IMAGE_PATTERN%%:*}" == "glob" ]; then
+   if [ "${FLATPAK_IMAGE_PATTERN%%:*}" = "glob" ]; then
        case $IMAGE_BASENAME in
            ${FLATPAK_IMAGE_PATTERN#glob:}) repo_enabled=yes;;
            *)                              repo_enabled="";;
@@ -75,7 +75,7 @@ do_flatpakrepo () {
 
     # Generate repository signing GPG keys, if we don't have them yet.
     FLATPAK_GPG_SIGN="${@d.getVar('FLATPAK_GPG_SIGN')}"
-    if [ "${FLATPAK_GPG_SIGN}" == "1" ]; then
+    if [ "${FLATPAK_GPG_SIGN}" = "1" ]; then
         $FLATPAKBASE/scripts/gpg-keygen.sh \
             --home $FLATPAK_GPGDIR \
             --id $FLATPAK_GPGID \

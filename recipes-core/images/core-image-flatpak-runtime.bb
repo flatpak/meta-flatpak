@@ -3,6 +3,9 @@
 
 include ../meta/recipes-core/images/core-image-minimal.bb
 
+# Disable disk image creation
+IMAGE_FSTYPES = ""
+
 # Enable flatpak and SSH server distro features.
 IMAGE_FEATURES_append = " flatpak ssh-server-openssh"
 

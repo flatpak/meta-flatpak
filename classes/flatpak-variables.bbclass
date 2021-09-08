@@ -42,7 +42,7 @@ FLATPAK_BUILD    = "${BUILD_ID}"
 # a regexp suitable for grep or a shell globbing pattern that will
 # match your image name. For globbing patterns, the value should be
 # prefixed with 'glob:'.
-FLATPAK_IMAGE_PATTERN ?= 'glob:*-flatpak-sdk'
+FLATPAK_IMAGE_PATTERN ?= '^.*-flatpak-\(runtime\|sdk\)$'
 
 # You can pre-declare flatpak repositories/remotes for flatpak-enabled
 # images. Devices running such an image will monitor the remotes for

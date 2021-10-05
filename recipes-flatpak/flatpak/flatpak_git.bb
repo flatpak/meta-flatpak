@@ -4,12 +4,13 @@ LICENSE = "LGPLv2.1"
 LIC_FILES_CHKSUM = "file://COPYING;md5=4fbd65380cdd255951079008b364516c"
 
 SRC_URI = " \
-    gitsm://git@github.com/flatpak/flatpak;protocol=https;branch=flatpak-1.10.x \
+    gitsm://git@github.com/flatpak/flatpak;protocol=https;branch=master \
 "
+SRC_URI += " file://vartmp.patch "
 
-SRCREV = "c614eb400ed9f9ec516d74a43e7d63783e3fe1fb"
+SRCREV = "dd6b99d0d30129c1beab8fe61ba4f1beb15930c5"
 
-PV = "1.10.2+git${SRCPV}"
+PV = "1.11.3+git${SRCPV}"
 S = "${WORKDIR}/git"
 
 inherit autotools pkgconfig gettext systemd gobject-introspection gtk-doc manpages
@@ -95,8 +96,8 @@ do_configure[vardeps] += "SYSROOT_DIR"
 do_configure_prepend() {
     # this reflects what autogen.sh does, but the OE wrappers for autoreconf
     # allow it to work without the other gyrations which exist there
-    sed -e 's,$(libglnx_srcpath),libglnx,g' < ${S}/libglnx/Makefile-libglnx.am >${S}/libglnx/Makefile-libglnx.am.inc
-    sed -e 's,$(bwrap_srcpath),bubblewrap,g' < ${S}/bubblewrap/Makefile-bwrap.am >${S}/bubblewrap/Makefile-bwrap.am.inc
+    sed -e 's,$(libglnx_srcpath),subprojects/libglnx,g' < ${S}/subprojects/libglnx/Makefile-libglnx.am >${S}/subprojects/libglnx/Makefile-libglnx.am.inc
+    sed -e 's,$(bwrap_srcpath),subprojects/bubblewrap,g' < ${S}/subprojects/bubblewrap/Makefile-bwrap.am >${S}/subprojects/bubblewrap/Makefile-bwrap.am.inc
 }
 
 BBCLASSEXTEND = "native"

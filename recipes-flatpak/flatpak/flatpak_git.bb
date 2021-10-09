@@ -4,13 +4,12 @@ LICENSE = "LGPLv2.1"
 LIC_FILES_CHKSUM = "file://COPYING;md5=4fbd65380cdd255951079008b364516c"
 
 SRC_URI = " \
-    gitsm://git@github.com/flatpak/flatpak;protocol=https;branch=master \
+    gitsm://git@github.com/flatpak/flatpak;protocol=https;branch=flatpak-1.12.x \
 "
-SRC_URI += " file://vartmp.patch "
 
-SRCREV = "dd6b99d0d30129c1beab8fe61ba4f1beb15930c5"
+SRCREV = "afb3575d3113a8491af25af3bbc7bcf1cb5b9b33"
 
-PV = "1.11.3+git${SRCPV}"
+PV = "1.12.1+git${SRCPV}"
 S = "${WORKDIR}/git"
 
 inherit autotools pkgconfig gettext systemd gobject-introspection gtk-doc manpages

@@ -4,7 +4,7 @@ LICENSE = "LGPLv2.1"
 LIC_FILES_CHKSUM = "file://COPYING;md5=4fbd65380cdd255951079008b364516c"
 
 SRC_URI = " \
-    gitsm://git@github.com/flatpak/flatpak;protocol=https;branch=master \
+    gitsm://git@github.com/flatpak/flatpak;protocol=https;branch=main \
 "
 SRC_URI += " file://vartmp.patch "
 
